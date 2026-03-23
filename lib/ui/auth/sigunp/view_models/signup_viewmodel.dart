@@ -1,0 +1,60 @@
+import 'package:diakron_collection_center/data/repositories/auth/auth_repository.dart';
+import 'package:diakron_collection_center/utils/command.dart';
+import 'package:diakron_collection_center/utils/result.dart';
+import 'package:flutter/foundation.dart';
+import 'package:logger/web.dart';
+
+class SignupViewmodel extends ChangeNotifier {
+  SignupViewmodel({required AuthRepository authRepository})
+    : _authRepository = authRepository {
+    signup =
+        Command1<
+          void,
+          (
+            String userName,
+            String surnames,
+            String email,
+            String phoneNumber,
+            String password,
+            String confirmPassword,
+          )
+        >(_signUp);
+  }
+
+  final AuthRepository _authRepository;
+  final Logger _logger = Logger();
+
+  late Command1 signup;
+
+  Future<Result<void>> _signUp(
+    (String, String, String, String, String, String) data,
+  ) async {
+    final (userName, surnames, email, phoneNumber, password, confirmPassword) =
+        data;
+
+    _logger.i("Email:$email\nPsw:$password\nconfPsw:$confirmPassword");
+
+    if (password != confirmPassword ||
+        password == '' ||
+        confirmPassword == '') {
+      return Result.error(Exception('pws_not_match'));
+    }
+
+    // Try to sign up
+    final result = await _authRepository.signUp(
+      username: userName,
+      surnames: surnames,      
+      email: email,
+      phoneNumber: phoneNumber,
+      password: password,
+    );
+
+    if (result is Error<void>) {
+      _logger.w('Sign up failed! $result');
+    }
+
+    _logger.i('Sign up success! $result');
+
+    return result;
+  }
+}

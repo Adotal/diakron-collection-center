@@ -1,0 +1,30 @@
+name: diakron_collection_center
+description: "Diakron Collection Center"
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.10.8
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_dotenv: ^6.0.0
+  flutter_localizations:
+    sdk: flutter
+  go_router: ^17.1.0
+  intl: any
+  logger: ^2.7.0
+  provider: ^6.1.5+1
+  supabase_flutter: ^2.12.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - .env
