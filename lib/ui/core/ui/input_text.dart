@@ -4,11 +4,12 @@
 import 'package:flutter/material.dart';
 
 class InputText extends StatelessWidget {
-  const InputText({super.key, required this.controller, required this.hintText, this.obscureText = false});
+  const InputText({super.key, required this.controller, required this.hintText, this.obscureText = false, this.suffixIcon});
 
   final String hintText;
   final bool obscureText;
   final TextEditingController controller;
+  final Widget? suffixIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +24,7 @@ class InputText extends StatelessWidget {
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: TextStyle(color: Colors.grey[600]),
+          suffixIcon: suffixIcon,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         ),

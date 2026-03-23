@@ -71,7 +71,7 @@ class MainApp extends StatelessWidget {
       // Default locale
       locale: Locale("es"),
 
-      title: 'Diakron Admin',
+      title: 'Diakron Collection Center',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: AppColors.greenDiakron1,

@@ -14,22 +14,61 @@ class LogoutButton extends StatefulWidget {
 
 class _LogoutButtonState extends State<LogoutButton> {
   @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: () {
-        widget.viewModel.logout.execute();
-        context.go(Routes.login);
+  void initState() {
+    super.initState();
+    widget.viewModel.logout.addListener(_onResult);
+  }
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            duration: Duration(seconds: 5),
-            persist: false,
-            dismissDirection: DismissDirection.horizontal,
-            content: Text('HICE LOGOUT'),
-          ),
+  @override
+  void didUpdateWidget(covariant LogoutButton oldWidget) {
+    oldWidget.viewModel.logout.removeListener(_onResult);
+    widget.viewModel.logout.addListener(_onResult);
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void dispose() {
+    widget.viewModel.logout.removeListener(_onResult);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: widget.viewModel.logout,
+      builder: (context, _) {
+        return IconButton(
+          icon: widget.viewModel.logout.running
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.logout_rounded, color: Colors.grey),
+          onPressed: () => widget.viewModel.logout.execute(),
         );
       },
-      icon: Icon(Icons.logout),
     );
+  }
+
+  void _onResult() {
+    if (widget.viewModel.logout.completed) {
+      widget.viewModel.logout.clearResult();
+      context.go(Routes.login);
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Logout successful')));
+    }
+    if (widget.viewModel.logout.error) {
+      final error = widget.viewModel.logout.result;
+
+      widget.viewModel.logout.clearResult();
+      context.go(Routes.login);
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
+    }
   }
 }
