@@ -1,3 +1,4 @@
+import 'package:diakron_collection_center/l10n/app_localizations.dart';
 import 'package:diakron_collection_center/routing/routes.dart';
 import 'package:diakron_collection_center/ui/auth/reset_password/view_models/reset_password_viewmodel.dart';
 import 'package:diakron_collection_center/ui/core/themes/dimens.dart';
@@ -19,6 +20,8 @@ class ResetPasswordScreen extends StatefulWidget {
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final TextEditingController _password = TextEditingController();
   final TextEditingController _confirmPassword = TextEditingController();
+  
+  bool _isPasswordObscured = true;
 
   @override
   void initState() {
@@ -53,17 +56,39 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               style: TextStyle(fontSize: Dimens.fontBig),
             ),
             const SizedBox(height: Dimens.paddingVertical),
-            InputText(
-              controller: _password,
-              hintText: "Nueva contraseña",
-              obscureText: true,
+           InputText(
+            controller: _password,
+            hintText: AppLocalizations.of(context)!.password,
+            obscureText: _isPasswordObscured,
+            suffixIcon: IconButton(
+              icon: Icon(
+                _isPasswordObscured ? Icons.visibility_off : Icons.visibility,
+                color: Colors.grey,
+              ),
+              onPressed: () {
+                setState(() {
+                  _isPasswordObscured = !_isPasswordObscured;
+                });
+              },
             ),
+          ),
             const SizedBox(height: Dimens.paddingVertical),
             InputText(
-              controller: _confirmPassword,
-              hintText: "Confirmar contraseña",
-              obscureText: true,
+            controller: _confirmPassword,
+            hintText: AppLocalizations.of(context)!.confirmPassword,
+            obscureText: _isPasswordObscured,
+            suffixIcon: IconButton(
+              icon: Icon(
+                _isPasswordObscured ? Icons.visibility_off : Icons.visibility,
+                color: Colors.grey,
+              ),
+              onPressed: () {
+                setState(() {
+                  _isPasswordObscured = !_isPasswordObscured;
+                });
+              },
             ),
+          ),
             const SizedBox(height: Dimens.paddingVertical),
             FormButton(
               text: "Reestablecer",

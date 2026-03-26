@@ -1,10 +1,11 @@
 import 'package:diakron_collection_center/ui/core/themes/app_strings.dart';
 import 'package:diakron_collection_center/ui/core/themes/colors.dart';
+import 'package:diakron_collection_center/ui/core/themes/dimens.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class CustomScreen extends StatelessWidget {
-  const CustomScreen({super.key, required this.child,});
+  const CustomScreen({super.key, required this.child});
 
   final Widget child;
 
@@ -14,6 +15,11 @@ class CustomScreen extends StatelessWidget {
       backgroundColor: AppColors.greenDiakron1, // El verde de Diakron
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: Dimens.formPaddingHorizontal,
+            ),
+          ),
           // SECCIÓN SUPERIOR (AppBar Personalizada)
           SafeArea(
             bottom: false, // No padding abajo para que pegue con lo blanco

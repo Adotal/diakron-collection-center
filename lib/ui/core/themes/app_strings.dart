@@ -3,5 +3,5 @@
 class AppStrings {
 
   static const diakron = 'DIAKRON';
-  static const appName = 'Diakron Admin';
+  static const appName = 'Diakron CollectionC';
 }

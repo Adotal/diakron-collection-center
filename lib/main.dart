@@ -1,8 +1,11 @@
 import 'package:diakron_collection_center/data/repositories/auth/auth_repository.dart';
+import 'package:diakron_collection_center/data/repositories/user/user_repository.dart';
 import 'package:diakron_collection_center/data/services/auth_service.dart';
+import 'package:diakron_collection_center/data/services/database_service.dart';
 import 'package:diakron_collection_center/l10n/app_localizations.dart';
 import 'package:diakron_collection_center/routing/router.dart';
 import 'package:diakron_collection_center/ui/core/themes/colors.dart';
+import 'package:diakron_collection_center/ui/upload_files/view_models/upload_files_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -10,8 +13,6 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
-
-
   // To load the .env file contents into dotenv.
   await dotenv.load(fileName: ".env");
 
@@ -29,6 +30,11 @@ Future<void> main() async {
       providers: [
         // Provider(create: (context) => AuthService()),
         Provider<AuthService>(create: (_) => AuthService()),
+        Provider<DatabaseService>(create: (_) => DatabaseService()),
+        ChangeNotifierProvider(
+          create: (context) =>
+              UserRepository(databaseService: context.read<DatabaseService>()),
+        ),
         // AuthRepository is a ChangeNotifier, so we MUST use ChangeNotifierProxyProvider
         ChangeNotifierProxyProvider<AuthService, AuthRepository>(
           create: (context) =>
@@ -39,6 +45,10 @@ Future<void> main() async {
                 AuthRepository(authService: authService);
           },
         ),
+        ChangeNotifierProvider(create: (context) => UploadFilesViewModel(     
+          authRepository: context.read<AuthRepository>(),
+          userRepository: context.read<UserRepository>(),
+        )),
       ],
       child: const MainApp(),
     ),

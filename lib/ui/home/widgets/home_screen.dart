@@ -1,6 +1,7 @@
 import 'package:diakron_collection_center/data/repositories/auth/auth_repository.dart';
 import 'package:diakron_collection_center/ui/auth/logout/view_models/logout_viewmodel.dart';
 import 'package:diakron_collection_center/ui/auth/logout/widgets/logout_button.dart';
+import 'package:diakron_collection_center/ui/core/themes/colors.dart';
 import 'package:diakron_collection_center/ui/home/view_models/home_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -19,11 +20,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      
       // AppBar simple para poder volver atrás o cambiar tema si quisieras
       body: SafeArea(
         child: SingleChildScrollView(
@@ -40,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Icon(
                         Icons.confirmation_number,
                         size: 24,
-                        color: theme.iconTheme.color,
+                        
                       ),
                       const SizedBox(width: 8),
                       Text(
@@ -48,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: theme.textTheme.bodyLarge?.color,
+                          
                         ),
                       ),
                     ],
@@ -68,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: theme.primaryColor,
+                  color: AppColors.greenDiakron1,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -108,7 +107,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: theme.textTheme.bodyLarge?.color,
                 ),
               ),
               const SizedBox(height: 15),
@@ -129,7 +127,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: theme.textTheme.bodyLarge?.color,
                 ),
               ),
               const SizedBox(height: 15),
@@ -150,9 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        backgroundColor: theme.scaffoldBackgroundColor, // Fondo dinámico
         currentIndex: _selectedIndex,
-        selectedItemColor: theme.primaryColor, // Verde activo
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
 

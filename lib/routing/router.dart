@@ -1,5 +1,8 @@
 // Routes manager
 import 'package:diakron_collection_center/data/repositories/auth/auth_repository.dart';
+import 'package:diakron_collection_center/data/repositories/user/user_repository.dart';
+import 'package:diakron_collection_center/data/services/auth_service.dart';
+import 'package:diakron_collection_center/models/user/collection_center.dart';
 import 'package:diakron_collection_center/routing/routes.dart';
 import 'package:diakron_collection_center/ui/auth/forgot_password/view_models/forgot_password_viewmodel.dart';
 import 'package:diakron_collection_center/ui/auth/forgot_password/widgets/forgot_password_screen.dart';
@@ -11,6 +14,8 @@ import 'package:diakron_collection_center/ui/auth/sigunp/view_models/signup_view
 import 'package:diakron_collection_center/ui/auth/sigunp/widgets/signup_screen.dart';
 import 'package:diakron_collection_center/ui/home/view_models/home_viewmodel.dart';
 import 'package:diakron_collection_center/ui/home/widgets/home_screen.dart';
+import 'package:diakron_collection_center/ui/upload_files/widgets/upload_files_pages.dart';
+import 'package:diakron_collection_center/ui/upload_files/widgets/upload_files_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -54,15 +59,36 @@ GoRouter router(AuthRepository authRepository) => GoRouter(
       path: Routes.resetpassword,
       builder: (context, state) {
         final viewModel = ResetPasswordViewmodel(
-          authRepository: context.read<AuthRepository>()
+          authRepository: context.read<AuthRepository>(),
         );
         return ResetPasswordScreen(viewModel: viewModel);
       },
     ),
+
+    ShellRoute(
+      builder: (context, state, child) {
+        // Here are progress bar and button
+        return UploadFilesShell(child: child);
+      },
+      routes: [
+        GoRoute(
+          path: Routes.uploadData,
+          builder: (context, state) => const UploadFilesStep1Page(),
+        ),
+        GoRoute(
+          path: Routes.uploadData2,
+          builder: (context, state) => const UploadFilesStep2Page(),
+        ),
+        GoRoute(
+          path: Routes.uploadData3,
+          builder: (context, state) => const UploadFilesStep3Page(),
+        ),
+      ],
+    ),
     GoRoute(
       path: Routes.signup,
       builder: (context, state) {
-        final viewModel = SignupViewmodel(
+        final viewModel = SignupViewModel(
           authRepository: context.read<AuthRepository>(),
         );
         return SignupScreen(viewModel: viewModel);
@@ -72,10 +98,11 @@ GoRouter router(AuthRepository authRepository) => GoRouter(
 );
 
 Future<String?> _redirect(BuildContext context, GoRouterState state) async {
+  final userRepo = context.read<UserRepository>();
   final authRepo = context.read<AuthRepository>();
-  final bool loggedIn = authRepo.isAuthenticated;
-  
-  // Locations
+  final bool loggedIn = authRepo.isLogged;
+
+  // // Locations
   final bool isAtLogin = state.matchedLocation == Routes.login;
   final bool isAtReset = state.matchedLocation == Routes.resetpassword;
   final bool isAtForgot = state.matchedLocation == Routes.forgotpassword;
@@ -90,16 +117,37 @@ Future<String?> _redirect(BuildContext context, GoRouterState state) async {
   // 2. If not logged in, and not on an "Auth" page (login, signup, forgot), go to Login
   if (!loggedIn) {
     if (isAtLogin || isAtForgot || isAtSignup || isAtReset) {
-      return null; 
+      return null;
     }
     return Routes.login;
   }
 
-  // 3. If logged in but trying to hit the login or signup page, go Home
-  // if (loggedIn && (isAtLogin || isAtSignup)) {
-  //   return Routes.home;
-  // }
+  final bool isVerifiedByAdmin = await userRepo.isValidated(
+    context.read<AuthService>().currentUser!.id,
+  );
 
+  final validationStatus = await userRepo.getValidationStatus(
+    context.read<AuthService>().currentUser!.id,
+  );
+
+  final bool atUploadData =
+      (state.matchedLocation == Routes.uploadData ||
+      state.matchedLocation == Routes.uploadData2 ||
+      state.matchedLocation == Routes.uploadData3);
+
+  switch (validationStatus) {
+    case ValidationStatus.approved:
+      return Routes.home;
+    case ValidationStatus.uploading:
+    // If not already in a uploading proccess redirect to it
+      if (!atUploadData) {
+        return Routes.uploadData;
+      }
+    case ValidationStatus.pending:
+      return Routes.home;
+    case ValidationStatus.denied:
+    // return Routes.denied;
+  }
   return null;
 }
 

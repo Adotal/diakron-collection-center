@@ -21,7 +21,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController _email = TextEditingController(
-    text: 'adotal1484@gmail.com',
+    text: 'ccenter@gmail.com',
   );
 
   final TextEditingController _password = TextEditingController(
@@ -184,7 +184,9 @@ class _LoginScreenState extends State<LoginScreen>
           const SizedBox(height: Dimens.paddingVertical),
 
           GestureDetector(
-            onTap: () => context.push(Routes.signup),
+            onTap: () {
+              context.push(Routes.signup);
+            },
             child: Column(
               children: [
                 Text(
@@ -275,7 +277,7 @@ class _LoginScreenState extends State<LoginScreen>
                           ),
                           if (_animationController.value > 0.0) // 0.8
                             Text(
-                              AppLocalizations.of(context)!.administrators,
+                              AppLocalizations.of(context)!.collection_centers,
                               style: const TextStyle(
                                 fontSize: Dimens.fontMedium,
                                 color: Colors.white70,

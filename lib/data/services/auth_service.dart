@@ -8,6 +8,10 @@ class AuthService {
   Stream<AuthState> get onAuthStateChange => _supabase.auth.onAuthStateChange;
 
   Session? get currentSession => _supabase.auth.currentSession;
+  User? get currentUser => _supabase.auth.currentUser;
+
+  // Get curren user id
+  String? get currentUserId => Supabase.instance.client.auth.currentUser?.id;
 
   // Sign in (login)
   Future<Result<AuthResponse>> signInEmailPassword({
@@ -34,7 +38,7 @@ class AuthService {
     required String password,
     required String username,
     required String surnames,
-    required String phoneNumber,    
+    required String phoneNumber,
   }) async {
     try {
       final result = await _supabase.auth.signUp(
@@ -47,8 +51,7 @@ class AuthService {
           // Empieza desactivado porque es solicitud de registro
           'is_active': false,
           // Siempre es admin
-          'user_type': 'admin',
-          'is_superadmin': false,
+          'user_type': 'collection_center',
         },
       );
 
@@ -69,7 +72,7 @@ class AuthService {
     try {
       await _supabase.auth.resetPasswordForEmail(
         email,
-        redirectTo: 'io.supabase.diakron.admin://reset-password/',
+        redirectTo: 'io.supabase.diakron.collectioncenter://reset-password/',
       );
       return Result.ok(null);
     } catch (error) {

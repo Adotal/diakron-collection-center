@@ -11,7 +11,7 @@ import 'package:go_router/go_router.dart';
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key, required this.viewModel});
 
-  final SignupViewmodel viewModel;
+  final SignupViewModel viewModel;
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
@@ -20,13 +20,13 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   // Controllers
   final TextEditingController _name = TextEditingController(
-    text: 'UserTestName',
+    text: 'CCenterName',
   );
   final TextEditingController _surnames = TextEditingController(
-    text: 'UserTestSurname',
+    text: 'CCenterSurname',
   );
   final TextEditingController _email = TextEditingController(
-    text: 'adotal1484@gmail.com',
+    text: 'ccenter@gmail.com',
   );
   final TextEditingController _phoneNumber = TextEditingController(
     text: '1234567890',
@@ -243,8 +243,9 @@ class _SignupScreenState extends State<SignupScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Usuario registrado!')));
+      
 
-      context.go(Routes.login);
+      context.go(Routes.uploadData);
     }
 
     if (widget.viewModel.signup.error) {

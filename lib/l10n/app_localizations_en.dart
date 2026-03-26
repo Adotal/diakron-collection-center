@@ -12,9 +12,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get helloWorld => 'Hello World!';
 
   @override
-  String get administrators => 'ADMINISTRATORS';
-
-  @override
   String get collection_centers => 'CENTROS DE ACOPIO';
 
   @override
@@ -27,7 +24,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmPassword => 'Confirmar contraseña';
 
   @override
-  String get phoneNumber => 'Número telefónico';
+  String get phoneNumber => 'Número telefónico del representante';
 
   @override
   String get names => 'Nombre(s)';
@@ -39,7 +36,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signUp => 'Sign Up!';
 
   @override
-  String get createAccount => 'Crear cuenta';
+  String get createAccount => 'Crear cuenta de representante legal';
 
   @override
   String get haveAnAccount => '¿Ya tienes una cuenta?';

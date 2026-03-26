@@ -104,12 +104,6 @@ abstract class AppLocalizations {
   /// **'Hola Mundo'**
   String get helloWorld;
 
-  /// No description provided for @administrators.
-  ///
-  /// In es, this message translates to:
-  /// **'ADMINISTRADORES'**
-  String get administrators;
-
   /// No description provided for @collection_centers.
   ///
   /// In es, this message translates to:
@@ -119,7 +113,7 @@ abstract class AppLocalizations {
   /// No description provided for @email.
   ///
   /// In es, this message translates to:
-  /// **'Correo electrónico'**
+  /// **'Correo electrónico del representante'**
   String get email;
 
   /// No description provided for @password.
@@ -137,7 +131,7 @@ abstract class AppLocalizations {
   /// No description provided for @phoneNumber.
   ///
   /// In es, this message translates to:
-  /// **'Número telefónico'**
+  /// **'Número telefónico del representante'**
   String get phoneNumber;
 
   /// No description provided for @names.
@@ -161,7 +155,7 @@ abstract class AppLocalizations {
   /// No description provided for @createAccount.
   ///
   /// In es, this message translates to:
-  /// **'Crear cuenta'**
+  /// **'Crear cuenta de representante legal'**
   String get createAccount;
 
   /// No description provided for @haveAnAccount.

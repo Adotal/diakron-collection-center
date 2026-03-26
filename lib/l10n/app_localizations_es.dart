@@ -12,13 +12,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get helloWorld => 'Hola Mundo';
 
   @override
-  String get administrators => 'ADMINISTRADORES';
-
-  @override
   String get collection_centers => 'CENTROS DE ACOPIO';
 
   @override
-  String get email => 'Correo electrónico';
+  String get email => 'Correo electrónico del representante';
 
   @override
   String get password => 'Contraseña';
@@ -27,7 +24,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get confirmPassword => 'Confirmar contraseña';
 
   @override
-  String get phoneNumber => 'Número telefónico';
+  String get phoneNumber => 'Número telefónico del representante';
 
   @override
   String get names => 'Nombre(s)';
@@ -39,7 +36,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get signUp => '¡Regístrate!';
 
   @override
-  String get createAccount => 'Crear cuenta';
+  String get createAccount => 'Crear cuenta de representante legal';
 
   @override
   String get haveAnAccount => '¿Ya tienes una cuenta?';

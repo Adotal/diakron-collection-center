@@ -4,8 +4,8 @@ import 'package:diakron_collection_center/utils/result.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logger/web.dart';
 
-class SignupViewmodel extends ChangeNotifier {
-  SignupViewmodel({required AuthRepository authRepository})
+class SignupViewModel extends ChangeNotifier {
+  SignupViewModel({required AuthRepository authRepository})
     : _authRepository = authRepository {
     signup =
         Command1<
