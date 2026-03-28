@@ -156,31 +156,3 @@ Future<String?> _redirect(BuildContext context, GoRouterState state) async {
   }
   return null;
 }
-
-// Future<String?> _redirect(BuildContext context, GoRouterState state) async {
-//   // if the user is not logged in, they need to login
-//   final bool loggedIn = context.read<AuthRepository>().isAuthenticated;
-//   final bool loggingIn = (state.matchedLocation == Routes.login);
-
-//   // Deep Link for Password Reset
-//   // Supabase sends the user to /callback by default;
-//   // check if the incoming path matches your reset route.
-//   final bool isResetting = (state.matchedLocation == Routes.resetpassword);
-
-//   if (context.read<AuthRepository>().isRecoveringPassword) {
-//     return Routes.resetpassword; // Push them to the reset screen
-//   }
-
-//   // If not logged in and its not already on login/reset page, force login
-//   // if (!loggedIn && loggingIn && !isResetting) {
-//   //   return Routes.login;
-//   // }
-
-//   // If logged in and trying to go to login page, send home
-//   // if (loggedIn && loggingIn && !isResetting) {
-//   //   return Routes.home;
-//   // }
-
-//   // No need to redirect at all
-//   return null;
-// }
