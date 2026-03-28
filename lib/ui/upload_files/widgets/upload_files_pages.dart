@@ -39,9 +39,16 @@ class UploadFilesStep1Page extends StatelessWidget {
           ),
 
           CustomTextFormField(
-            labelText: "Dirección",
+            labelText: "Dirección fiscal",
             controller: vm.addressController,
             validator: Validators.required,
+          ),
+
+          CustomTextFormField(
+            labelText: "Código postal de dirección fiscal",
+            controller: vm.postCodeController,
+            keyboardType: TextInputType.number,
+            validator: Validators.postCode,
           ),
 
           ListenableBuilder(
@@ -179,6 +186,7 @@ class UploadFilesStep2Page extends StatelessWidget {
             labelText: "CLABE",
             controller: vm.clabeController,
             validator: Validators.clabe,
+            keyboardType: TextInputType.number,
           ),
         ],
       ),

@@ -71,6 +71,7 @@ class UploadFilesViewModel extends ChangeNotifier {
   );
   final curpController = TextEditingController(text: "OEOA070414HAAAAAA9");
   final addressController = TextEditingController(text: "addressController");
+  final postCodeController = TextEditingController(text: "44000");
 
   // Billing data
   final billingEmailController = TextEditingController(
@@ -286,6 +287,10 @@ class Validators {
 
   // CURP (Mexico - 18 chars)
   static String? curp(String? value) {
+    final emptyField = required(value);
+    if (emptyField != null) {
+      return emptyField;
+    }
     final bool curpValid = RegExp(
       r'^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z\d]\d$',
     ).hasMatch(value ?? '');
@@ -302,6 +307,11 @@ class Validators {
     ˆ([A-ZÑ]|\&){3,4}[0-9]{2}(0[1-9]|1[0-2])([12][0-9]|0[1-9]|3[01])[A-Z0-9]{3}$
       */
 
+    final emptyField = required(value);
+    if (emptyField != null) {
+      return emptyField;
+    }
+
     final bool rfcValid = RegExp(
       r'^([A-ZÑ&]{3,4})([0-9]{2})(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])[A-Z\d]{3}$',
     ).hasMatch(value ?? '');
@@ -310,7 +320,20 @@ class Validators {
 
   // CLABE (18 digits)
   static String? clabe(String? value) {
+    final emptyField = required(value);
+    if (emptyField != null) {
+      return emptyField;
+    }
     final bool clabeValid = RegExp(r'^\d{18}$').hasMatch(value ?? '');
     return clabeValid ? null : 'CLABE debe tener 18 dígitos';
+  }
+
+  static String? postCode(String? value) {
+    final emptyField = required(value);
+    if (emptyField != null) {
+      return emptyField;
+    }
+    final bool postCodeValid = RegExp(r'^\d{5}$').hasMatch(value ?? '');
+    return postCodeValid ? null : 'Código postal debe tener 5 dígitos';
   }
 }
