@@ -1,7 +1,6 @@
 // Routes manager
 import 'package:diakron_collection_center/data/repositories/auth/auth_repository.dart';
 import 'package:diakron_collection_center/data/repositories/user/user_repository.dart';
-import 'package:diakron_collection_center/data/services/auth_service.dart';
 import 'package:diakron_collection_center/models/user/collection_center.dart';
 import 'package:diakron_collection_center/routing/routes.dart';
 import 'package:diakron_collection_center/ui/auth/forgot_password/view_models/forgot_password_viewmodel.dart';
@@ -100,7 +99,7 @@ GoRouter router(AuthRepository authRepository) => GoRouter(
 Future<String?> _redirect(BuildContext context, GoRouterState state) async {
   final userRepo = context.read<UserRepository>();
   final authRepo = context.read<AuthRepository>();
-  final bool loggedIn = authRepo.isLogged;
+  final bool loggedIn = authRepo.isAuthenticated;
 
   // // Locations
   final bool isAtLogin = state.matchedLocation == Routes.login;
@@ -122,24 +121,18 @@ Future<String?> _redirect(BuildContext context, GoRouterState state) async {
     return Routes.login;
   }
 
-  final bool isVerifiedByAdmin = await userRepo.isValidated(
-    context.read<AuthService>().currentUser!.id,
-  );
+  //final ValidationStatus validationStatus = userRepo.validationStatus!;
+  final validationStatus = await userRepo.getValidationStatus(authRepo.userId!);
 
-  final validationStatus = await userRepo.getValidationStatus(
-    context.read<AuthService>().currentUser!.id,
+  final bool atUploadData = state.matchedLocation.startsWith(
+    Routes.uploadDataRoot,
   );
-
-  final bool atUploadData =
-      (state.matchedLocation == Routes.uploadData ||
-      state.matchedLocation == Routes.uploadData2 ||
-      state.matchedLocation == Routes.uploadData3);
 
   switch (validationStatus) {
     case ValidationStatus.approved:
       return Routes.home;
     case ValidationStatus.uploading:
-    // If not already in a uploading proccess redirect to it
+      // If not already in a uploading proccess redirect to it
       if (!atUploadData) {
         return Routes.uploadData;
       }

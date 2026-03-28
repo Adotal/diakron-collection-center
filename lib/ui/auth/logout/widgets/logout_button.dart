@@ -44,7 +44,7 @@ class _LogoutButtonState extends State<LogoutButton> {
                   height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Icon(Icons.logout_rounded, color: Colors.grey),
+              : const Icon(Icons.logout_rounded, color: Colors.white),
           onPressed: () => widget.viewModel.logout.execute(),
         );
       },

@@ -11,21 +11,48 @@ class UserRepository extends ChangeNotifier {
 
   final DatabaseService _databaseService;
 
-  Future<ValidationStatus> getValidationStatus(String userId) async {
-    return await _databaseService.getValidationStatus(userId);
+  ValidationStatus? _validationStatus;
+  ValidationStatus? get validationStatus => _validationStatus;
+
+  Future<ValidationStatus> getValidationStatus(
+    String userId, {
+    bool forceRefresh = false,
+  }) async {
+    // 1. Return cache if available and we aren't forcing a refresh
+    if (_validationStatus != null && !forceRefresh) {
+      return _validationStatus!;
+    }
+
+    try {
+      // 2. Fetch from DB
+      final status = await _databaseService.getValidationStatus(userId);
+
+      // 3. Update local state and notify the app
+      _validationStatus = status;
+      notifyListeners();
+
+      return status;
+    } catch (e) {
+      // 4. Fallback/Error handling
+      return _validationStatus ?? ValidationStatus.uploading;
+    }
   }
 
- Future<String?> uploadFile({
+  void clearCache() {
+    _validationStatus = null;
+    notifyListeners();
+  }
+
+  Future<String?> uploadFile({
     required String id,
     required String fileName,
     required File file,
   }) async {
-    return await _databaseService.uploadFile(id: id, fileName: fileName, file: file);    
-  }
-
-  Future<bool> isValidated(String userId) async {
-    final status = await _databaseService.getValidationStatus(userId);
-    return (status == ValidationStatus.approved);
+    return await _databaseService.uploadFile(
+      id: id,
+      fileName: fileName,
+      file: file,
+    );
   }
 
   Future<Result<void>> uploadUserData(

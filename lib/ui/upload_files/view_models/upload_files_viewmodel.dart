@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:diakron_collection_center/data/repositories/auth/auth_repository.dart';
 import 'package:diakron_collection_center/data/repositories/user/user_repository.dart';
-import 'package:diakron_collection_center/data/services/auth_service.dart';
 import 'package:diakron_collection_center/models/user/collection_center.dart';
 import 'package:diakron_collection_center/utils/result.dart';
 import 'package:flutter/material.dart';
@@ -193,5 +192,35 @@ class UploadFilesViewModel extends ChangeNotifier {
 
       notifyListeners();
     }
+  }
+}
+
+class Validators {
+  // Empty Check
+  static String? required(String? value) => 
+    (value == null || value.isEmpty) ? 'Este campo es obligatorio' : null;
+
+  // Email (Billing)
+  static String? email(String? value) {
+    final bool emailValid = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value ?? '');
+    return emailValid ? null : 'Correo electrónico no válido';
+  }
+
+  // CURP (Mexico - 18 chars)
+  static String? curp(String? value) {
+    final bool curpValid = RegExp(r'^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z\d]\d$').hasMatch(value ?? '');
+    return curpValid ? null : 'CURP no válido (18 caracteres)';
+  }
+
+  // RFC (Mexico - 12 or 13 chars)
+  static String? rfc(String? value) {
+    final bool rfcValid = RegExp(r'^[A-ZÑ&]{3,4}\d{6}[A-Z\d]{3}$').hasMatch(value ?? '');
+    return rfcValid ? null : 'RFC no válido';
+  }
+
+  // CLABE (18 digits)
+  static String? clabe(String? value) {
+    final bool clabeValid = RegExp(r'^\d{18}$').hasMatch(value ?? '');
+    return clabeValid ? null : 'CLABE debe tener 18 dígitos';
   }
 }

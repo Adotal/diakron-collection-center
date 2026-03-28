@@ -2,6 +2,7 @@ import 'package:diakron_collection_center/data/repositories/auth/auth_repository
 import 'package:diakron_collection_center/routing/routes.dart';
 import 'package:diakron_collection_center/ui/auth/logout/view_models/logout_viewmodel.dart';
 import 'package:diakron_collection_center/ui/auth/logout/widgets/logout_button.dart';
+import 'package:diakron_collection_center/ui/core/themes/dimens.dart';
 import 'package:diakron_collection_center/ui/upload_files/view_models/upload_files_viewmodel.dart';
 import 'package:diakron_collection_center/ui/core/themes/app_strings.dart';
 import 'package:diakron_collection_center/ui/core/themes/colors.dart';
@@ -36,32 +37,36 @@ class UploadFilesShell extends StatelessWidget {
                 vertical: 4,
               ),
               width: double.infinity,
-              child: Column(
+              child: Column(                
                 children: [
-                  Row(
-                    children: [
-                      LogoutButton(viewModel: LogoutViewModel(authRepository: context.read<AuthRepository>())),
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        onPressed: () =>
-                            context.canPop() ? context.pop() : null,
-                      ),
-                      const SizedBox(width: 10),
-                      const Icon(
-                        Icons.recycling,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                      const SizedBox(width: 10),
-                      const Text(
-                        AppStrings.appName,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 0,
+                    horizontal: Dimens.paddingHorizontal),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(Icons.recycling, color: Colors.white, size: 30),
+                    
+                            SizedBox(width: 10),
+                            Text(
+                              AppStrings.appName,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                        LogoutButton(
+                          viewModel: LogoutViewModel(
+                            authRepository: context.read<AuthRepository>(),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   // BARRA DE PROGRESO (Debajo del Header)
                   Padding(
@@ -120,10 +125,11 @@ class UploadFilesShell extends StatelessWidget {
                               foregroundColor: Colors.white,
                             ),
                             onPressed: () {
-                              if (location.endsWith('3'))
+                              if (location.endsWith('3')) {
                                 context.go(Routes.uploadData2);
-                              else if (location.endsWith('2'))
+                              } else if (location.endsWith('2')) {
                                 context.go(Routes.uploadData);
+                              }
                             },
                             child: Text('Anterior'),
                           )
@@ -136,11 +142,11 @@ class UploadFilesShell extends StatelessWidget {
                             foregroundColor: Colors.white,
                           ),
                           onPressed: () {
-                            if (location.endsWith('1'))
+                            if (location.endsWith('1')) {
                               context.go(Routes.uploadData2);
-                            else if (location.endsWith('2'))
+                            } else if (location.endsWith('2')) {
                               context.go(Routes.uploadData3);
-                            else {
+                            } else {
                               // Lógica final de Registro
                               context
                                   .read<UploadFilesViewModel>()

@@ -1,7 +1,9 @@
 import 'package:diakron_collection_center/ui/core/ui/form_input_text.dart';
+import 'package:diakron_collection_center/ui/core/ui/input_text.dart';
 import 'package:diakron_collection_center/ui/upload_files/view_models/upload_files_viewmodel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:provider/provider.dart';
 
@@ -21,6 +23,19 @@ class UploadFilesStep1Page extends StatelessWidget {
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 20),
+
+        // TextFormField(
+        //   controller: vm.companyNameController,
+        //   inputFormatters: [
+        //     LengthLimitingTextInputFormatter(18),
+        //   ], // Límite físico
+        //   validator: (value) {
+        //     if (value == null || value.length != 18) {
+        //       return 'Debe tener 18 caracteres';
+        //     }
+        //     return null;
+        //   },
+        // ),
 
         FormInputText(
           labelText: "Razón social / Nombre legal",
@@ -110,7 +125,6 @@ class UploadFilesStep2Page extends StatelessWidget {
           labelText: "RFC de la empresa",
           controller: vm.rfcController,
         ),
-
 
         FormInputText(
           labelText: "Banco de operaciones",

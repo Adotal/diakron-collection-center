@@ -1,6 +1,4 @@
-import 'package:diakron_collection_center/data/repositories/user/user_repository.dart';
 import 'package:diakron_collection_center/data/services/auth_service.dart';
-import 'package:diakron_collection_center/models/user/collection_center.dart';
 import 'package:diakron_collection_center/utils/result.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -30,17 +28,14 @@ class AuthRepository extends ChangeNotifier {
   }
 
   final AuthService _authService;
-
+  
   // Provide the current user ID
   String? get userId => _authService.currentUserId;
+  bool get isAuthenticated => (_authService.currentUser != null);
 
-  // Ensures UI or other ViewModels can always find the ID
-  bool get hasId => userId != null;
-  bool get isLogged => _authService.currentUser != null;
 
   bool _isRecoveringPassword = false;
   bool get isRecoveringPassword => _isRecoveringPassword;
-
 
   Future<Result<void>> login(String email, String password) async {
     final result = await _authService.signInEmailPassword(
@@ -94,6 +89,7 @@ class AuthRepository extends ChangeNotifier {
   Future<Result<void>> logout() async {
     try {
       await _authService.signOut();
+      // CLEAR CACHE OF USER_REPO
       return Result.ok(null);
     } on Exception catch (error) {
       return Result.error(error);
