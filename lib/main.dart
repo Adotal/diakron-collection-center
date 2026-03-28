@@ -63,6 +63,7 @@ class MainApp extends StatelessWidget {
     // We use context.read() here because the Router handles its own
     // listeners via the refreshListenable property we set up earlier.
     final authRepository = context.read<AuthRepository>();
+    final userRepository = context.read<UserRepository>();
 
     return MaterialApp.router(
       // For localization and internation
@@ -90,7 +91,7 @@ class MainApp extends StatelessWidget {
         fontFamily: 'Arial', // Fuente genérica
       ),
 
-      routerConfig: router(authRepository),
+      routerConfig: router(authRepository, userRepository),
     );
   }
 }

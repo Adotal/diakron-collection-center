@@ -93,7 +93,7 @@ class UploadFilesShell extends StatelessWidget {
             ),
           ),
 
-          // CUERPO (Contenedor Blanco)
+          // Body
           Expanded(
             child: Container(
               width: double.infinity,
@@ -101,7 +101,10 @@ class UploadFilesShell extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.only(topLeft: Radius.circular(45.0)),
               ),
-              child: Column(
+              child:
+              context.watch<UploadFilesViewModel>().isProcessing ?
+              _LoadingView() :
+               Column(
                 children: [
                   // Contenido de la página (Step 1, 2 o 3)
                   Expanded(
@@ -185,6 +188,24 @@ class UploadFilesShell extends StatelessWidget {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+// Helper Widget for the Loading View
+class _LoadingView extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final message = context.select<UploadFilesViewModel, String>((vm) => vm.uploadMessage);
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(color: AppColors.greenDiakron1),
+          const SizedBox(height: 24),
+          Text(message, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
         ],
       ),
     );

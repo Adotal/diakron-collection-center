@@ -15,14 +15,18 @@ import 'package:diakron_collection_center/ui/home/view_models/home_viewmodel.dar
 import 'package:diakron_collection_center/ui/home/widgets/home_screen.dart';
 import 'package:diakron_collection_center/ui/upload_files/widgets/upload_files_pages.dart';
 import 'package:diakron_collection_center/ui/upload_files/widgets/upload_files_shell.dart';
+import 'package:diakron_collection_center/ui/wating_approval/widgets/waiting_approval_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-GoRouter router(AuthRepository authRepository) => GoRouter(
+GoRouter router(AuthRepository authRepository, UserRepository userRepository) => GoRouter(
   initialLocation: Routes.home,
   debugLogDiagnostics: true, // TESTING
-  refreshListenable: authRepository,
+  refreshListenable: Listenable.merge([
+   authRepository,
+   userRepository,
+  ]),
   redirect: _redirect,
 
   routes: [
@@ -93,6 +97,15 @@ GoRouter router(AuthRepository authRepository) => GoRouter(
         return SignupScreen(viewModel: viewModel);
       },
     ),
+    GoRoute(
+      path: Routes.waitingApproval,
+      builder: (context, state) {
+        // final viewModel = SignupViewModel(
+        //   authRepository: context.read<AuthRepository>(),
+        // );
+        return WaitingApprovalPage();
+      },
+    ),
   ],
 );
 
@@ -137,7 +150,7 @@ Future<String?> _redirect(BuildContext context, GoRouterState state) async {
         return Routes.uploadData;
       }
     case ValidationStatus.pending:
-      return Routes.home;
+      return Routes.waitingApproval;
     case ValidationStatus.denied:
     // return Routes.denied;
   }

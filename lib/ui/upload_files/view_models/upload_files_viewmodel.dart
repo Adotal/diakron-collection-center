@@ -212,6 +212,7 @@ class UploadFilesViewModel extends ChangeNotifier {
         _updateProgress('Todo listo!');
         _logger.d(_collectionCenter.toJson());
         await _userRepository.getValidationStatus(userId, forceRefresh: true);
+        _isProcessing = false;
         break;
       case Error():
         _updateProgress("Error al subir los datos. Reintenta.");
