@@ -37,18 +37,24 @@ class UploadFilesShell extends StatelessWidget {
                 vertical: 4,
               ),
               width: double.infinity,
-              child: Column(                
+              child: Column(
                 children: [
                   Padding(
-                    padding: EdgeInsets.symmetric(vertical: 0,
-                    horizontal: Dimens.paddingHorizontal),
+                    padding: EdgeInsets.symmetric(
+                      vertical: 0,
+                      horizontal: Dimens.paddingHorizontal,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Row(
                           children: [
-                            Icon(Icons.recycling, color: Colors.white, size: 30),
-                    
+                            Icon(
+                              Icons.recycling,
+                              color: Colors.white,
+                              size: 30,
+                            ),
+
                             SizedBox(width: 10),
                             Text(
                               AppStrings.appName,
@@ -142,16 +148,30 @@ class UploadFilesShell extends StatelessWidget {
                             foregroundColor: Colors.white,
                           ),
                           onPressed: () {
+                            final vm = context.read<UploadFilesViewModel>();
+
                             if (location.endsWith('1')) {
-                              context.go(Routes.uploadData2);
+                              if (vm.validateStep1()) {
+                                vm.timeErrorMsj = null;
+                                context.go(Routes.uploadData2);
+                              }
                             } else if (location.endsWith('2')) {
-                              context.go(Routes.uploadData3);
+                              if (vm.validateStep2()) {
+                                context.go(Routes.uploadData3);
+                              }
                             } else {
-                              // Lógica final de Registro
-                              context
-                                  .read<UploadFilesViewModel>()
-                                  .completeRegistration();
-                              context.go(Routes.login);
+                              if (vm.validateStep3()) {
+                                vm.completeRegistration();
+                                context.go(Routes.login);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "Por favor, sube todos los documentos",
+                                    ),
+                                  ),
+                                );
+                              }
                             }
                           },
                           child: Text(

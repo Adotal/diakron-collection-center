@@ -1,9 +1,9 @@
-import 'package:diakron_collection_center/ui/core/ui/form_input_text.dart';
-import 'package:diakron_collection_center/ui/core/ui/input_text.dart';
+import 'package:diakron_collection_center/ui/core/themes/colors.dart';
+import 'package:diakron_collection_center/ui/core/themes/dimens.dart';
+import 'package:diakron_collection_center/ui/core/ui/custom_text_form_field.dart';
 import 'package:diakron_collection_center/ui/upload_files/view_models/upload_files_viewmodel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:provider/provider.dart';
 
@@ -15,78 +15,85 @@ class UploadFilesStep1Page extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.read<UploadFilesViewModel>();
 
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: [
-        const Text(
-          "Datos de la empresa y representante",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 20),
+    return Form(
+      key: vm.step1FormKey,
+      child: ListView(
+        padding: const EdgeInsets.all(24),
+        children: [
+          const Text(
+            "Datos de la empresa y representante",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 20),
 
-        // TextFormField(
-        //   controller: vm.companyNameController,
-        //   inputFormatters: [
-        //     LengthLimitingTextInputFormatter(18),
-        //   ], // Límite físico
-        //   validator: (value) {
-        //     if (value == null || value.length != 18) {
-        //       return 'Debe tener 18 caracteres';
-        //     }
-        //     return null;
-        //   },
-        // ),
+          CustomTextFormField(
+            labelText: "Razón social / Nombre legal de la empresa",
+            controller: vm.companyNameController,
+            validator: Validators.required,
+          ),
 
-        FormInputText(
-          labelText: "Razón social / Nombre legal",
-          controller: vm.companyNameController,
-        ),
+          CustomTextFormField(
+            labelText: "Nombre comercial (será visible públicamente)",
+            controller: vm.commercialNameController,
+            validator: Validators.required,
+          ),
 
-        FormInputText(
-          labelText: "Nombre comercial (visible públicamente)",
-          controller: vm.commercialNameController,
-        ),
+          CustomTextFormField(
+            labelText: "Dirección",
+            controller: vm.addressController,
+            validator: Validators.required,
+          ),
 
-        FormInputText(labelText: "Dirección", controller: vm.addressController),
+          ListenableBuilder(
+            listenable: vm,
+            builder: (context, child) {
+              final timeErrorMsj = vm.timeErrorMsj;
+              return Column(
+                children: [
+                  ListTile(
+                    title: Text(
+                      "Horario de apertura: ${vm.openTime ?? '--:--'}",
+                    ),
+                    trailing: const Icon(Icons.access_time),
+                    onTap: () async {
+                      final time = await showTimePicker(
+                        context: context,
+                        initialTime: TimeOfDay.now(),
+                      );
+                      if (time != null) vm.updatePath('openTime', time);
+                    },
+                  ),
+                  ListTile(
+                    title: Text(
+                      "Horario de cierre: ${vm.closeTime ?? '--:--'}",
+                    ),
+                    trailing: const Icon(Icons.access_time),
+                    onTap: () async {
+                      final time = await showTimePicker(
+                        context: context,
+                        initialTime: TimeOfDay.now(),
+                      );
+                      if (time != null) vm.updatePath('closeTime', time);
+                    },
+                  ),
+                  if (timeErrorMsj != null)
+                    Text(
+                      timeErrorMsj,
+                      style: TextStyle(color: Colors.red, fontSize: 12),
+                    ),
+                  SizedBox(height: 10),
+                ],
+              );
+            },
+          ),
 
-        ListenableBuilder(
-          listenable: vm,
-          builder: (context, child) {
-            return ListTile(
-              title: Text("Horario de apertura: ${vm.openTime ?? '--:--'}"),
-              trailing: const Icon(Icons.access_time),
-              onTap: () async {
-                final time = await showTimePicker(
-                  context: context,
-                  initialTime: TimeOfDay.now(),
-                );
-                if (time != null) vm.updatePath('openTime', time);
-              },
-            );
-          },
-        ),
-        ListenableBuilder(
-          listenable: vm,
-          builder: (context, child) {
-            return ListTile(
-              title: Text("Horario de cierre: ${vm.closeTime ?? '--:--'}"),
-              trailing: const Icon(Icons.access_time),
-              onTap: () async {
-                final time = await showTimePicker(
-                  context: context,
-                  initialTime: TimeOfDay.now(),
-                );
-                if (time != null) vm.updatePath('closeTime', time);
-              },
-            );
-          },
-        ),
-
-        FormInputText(
-          labelText: "CURP del representante",
-          controller: vm.curpController,
-        ),
-      ],
+          CustomTextFormField(
+            labelText: "CURP del representante",
+            controller: vm.curpController,
+            validator: Validators.curp,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -98,41 +105,83 @@ class UploadFilesStep2Page extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.read<UploadFilesViewModel>();
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: [
-        const Text(
-          "Información fiscal",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 20),
+    return Form(
+      key: vm.step2FormKey,
+      child: ListView(
+        padding: const EdgeInsets.all(24),        
+        children: [
+          const Text(
+            "Información fiscal",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 20),
 
-        FormInputText(
-          labelText: "Correo electrónico de facturación",
-          controller: vm.billingEmailController,
-        ),
+          CustomTextFormField(
+            labelText: "Correo electrónico de facturación",
+            controller: vm.billingEmailController,
+            validator: Validators.email,
+          ),
 
-        FormInputText(
-          labelText: "Tipo de contribuyente (persona moral/física)",
-          controller: vm.taxpayerTypeController,
-        ),
+          SizedBox(height: 10),
 
-        FormInputText(
-          labelText: "Régimen fisal de la empresa",
-          controller: vm.taxRegimeController,
-        ),
-        FormInputText(
-          labelText: "RFC de la empresa",
-          controller: vm.rfcController,
-        ),
+          Text(
+            style: TextStyle(fontSize: Dimens.fontMedium),
+            "Tipo de contribuyente empresa"),
+          SizedBox(height: 10),
 
-        FormInputText(
-          labelText: "Banco de operaciones",
-          controller: vm.bankController,
-        ),
+          ListenableBuilder(
+            listenable: vm,
+            builder: (context, _) {
+              return
+               RadioGroup<TaxpayerType>(
+                groupValue: vm.currentType,
+                onChanged: (TaxpayerType? value) {
+                  vm.setTaxpayerType(value);
+                },
+                child: const
+              Column(
+                children: [
+                  RadioListTile<TaxpayerType>(
+                    title: Text("Persona Moral"),
+                    value: TaxpayerType.moral,
+                    activeColor: AppColors.greenDiakron1,
+                  ),
+                  RadioListTile<TaxpayerType>(
+                    title: Text("Persona Física"),
+                    value: TaxpayerType.physical,
+                    activeColor: AppColors.greenDiakron1,
+                  ),
+                ],
+                ),
+              );
+            },
+          ),
+          SizedBox(height: 10),
 
-        FormInputText(labelText: "CLABE", controller: vm.clabeController),
-      ],
+          CustomTextFormField(
+            labelText: "Régimen fisal de la empresa",
+            controller: vm.taxRegimeController,
+            validator: Validators.required,
+          ),
+          CustomTextFormField(
+            labelText: "RFC de la empresa",
+            controller: vm.rfcController,
+            validator: Validators.required,
+          ),
+
+          CustomTextFormField(
+            labelText: "Banco de operaciones",
+            controller: vm.bankController,
+            validator: Validators.required,
+          ),
+
+          CustomTextFormField(
+            labelText: "CLABE",
+            controller: vm.clabeController,
+            validator: Validators.clabe,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -177,10 +226,16 @@ class UploadFilesStep3Page extends StatelessWidget {
       allowedExtensions: ['pdf'],
     );
     if (result != null) {
-      context.read<UploadFilesViewModel>().updatePath(
-        field,
-        result.files.single.path,
-      );
+      final file = result.files.single;
+      // Check 10 MB limit
+      if (file.size > 10 * 1024 * 1024) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("El archivo supera los 10 MB")),
+        );
+        return;
+      }
+      // If its ok the size, save current file path
+      context.read<UploadFilesViewModel>().updatePath(field, file.path);
     }
   }
 }

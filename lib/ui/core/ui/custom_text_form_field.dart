@@ -1,24 +1,27 @@
 import 'package:diakron_collection_center/ui/core/themes/colors.dart';
 import 'package:flutter/material.dart';
 
-class FormInputText extends StatelessWidget {
-  const FormInputText({
+class CustomTextFormField extends StatelessWidget {
+  const CustomTextFormField({
     super.key,
     required this.labelText,
     required this.controller,
-    this.keyboardType,
+    required this.validator,
+    this.keyboardType, 
   });
 
   final String labelText;
   final TextEditingController controller;
   final TextInputType? keyboardType;
+  final String? Function(String?) validator;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: TextFormField(
-        controller: controller,
+        controller: controller,  
+        validator: validator,      
         keyboardType: keyboardType,
         decoration: InputDecoration(
           focusedBorder: OutlineInputBorder(
