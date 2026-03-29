@@ -38,7 +38,6 @@ class UploadFilesViewModel extends ChangeNotifier {
   final step3FormKey = GlobalKey<FormState>();
 
   bool validateStep1() {
-
     _logger.w(genScheduleMap());
 
     if (daysOpen.isEmpty) {
@@ -285,6 +284,21 @@ class UploadFilesViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void copyToAll(int fromIndex) {
+    final source = weekSchedules[fromIndex];
+    if (source.openTime == null || source.closeTime == null) return;
+
+    for (int i = 0; i < weekSchedules.length; i++) {
+      weekSchedules[i].isOpen = true;
+      weekSchedules[i].openTime = source.openTime;
+      weekSchedules[i].closeTime = source.closeTime;
+
+      // Agregamos el índice al Set para que el SegmentedButton se vea seleccionado
+      daysOpen.add(i);
+    }
+    notifyListeners();
+  }
+
   String? getErrorMessage(int index) {
     final day = weekSchedules[index];
     if (day.isOpen && day.openTime != null && day.closeTime != null) {
@@ -310,7 +324,7 @@ class UploadFilesViewModel extends ChangeNotifier {
     daysOpen = newSelection;
 
     // Sincronizamos el booleano isOpen en nuestros modelos
-    for (int i = 0; i < weekSchedules.length; i++) {      
+    for (int i = 0; i < weekSchedules.length; i++) {
       weekSchedules[i].isOpen = daysOpen.contains(i);
       // If not contains make it null
       weekSchedules[i].deleteTimesOnClosed();
@@ -330,8 +344,7 @@ class UploadFilesViewModel extends ChangeNotifier {
 
   Map<String, dynamic>? genScheduleMap() {
     final Map<String, dynamic> scheduleMap = {
-      for (var day in weekSchedules) 
-      day.dayName: day.toJson(),
+      for (var day in weekSchedules) day.dayName: day.toJson(),
     };
     return scheduleMap;
   }
@@ -421,8 +434,8 @@ class DaySchedule {
     this.closeTime,
   });
 
-  void deleteTimesOnClosed(){
-    if(!isOpen){
+  void deleteTimesOnClosed() {
+    if (!isOpen) {
       openTime = closeTime = null;
     }
   }

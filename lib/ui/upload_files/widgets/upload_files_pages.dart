@@ -60,8 +60,8 @@ class UploadFilesStep1Page extends StatelessWidget {
 
           Column(
             children: [
-              Text('Días de operación'),
-              SizedBox(height: 10,),
+              Text('Selecciona los días de operación de la empresa'),
+              SizedBox(height: 10),
               // Day selector
               ListenableBuilder(
                 listenable: vm,
@@ -86,7 +86,7 @@ class UploadFilesStep1Page extends StatelessWidget {
                 },
               ),
 
-              const SizedBox(height: 20),              
+              const SizedBox(height: 20),
 
               // 2. La lista de horarios dinámicos
               ListenableBuilder(
@@ -99,6 +99,7 @@ class UploadFilesStep1Page extends StatelessWidget {
                     children: selectedIndices.map((index) {
                       final error = vm.getErrorMessage(index);
                       final day = vm.weekSchedules[index];
+
                       return Card(
                         margin: const EdgeInsets.only(bottom: 12),
                         child: Padding(
@@ -109,6 +110,23 @@ class UploadFilesStep1Page extends StatelessWidget {
                               Column(
                                 children: [
                                   ListTile(
+                                    trailing:
+                                        (day.openTime != null &&
+                                            day.closeTime != null)
+                                        ? IconButton(
+                                            icon: const Icon(
+                                              Icons.copy_all,
+                                              color: Colors.blue,
+                                            ),
+                                            tooltip: "Copiar a toda la semana",
+                                            onPressed: () => _confirmCopy(
+                                              context,
+                                              vm,
+                                              index,
+                                            ),
+                                          )
+                                        : null,
+
                                     title: Text(
                                       day.dayName,
                                       style: const TextStyle(
@@ -254,7 +272,31 @@ class UploadFilesStep1Page extends StatelessWidget {
               );
             },
           ),
+        ],
+      ),
+    );
+  }
 
+  void _confirmCopy(BuildContext context, UploadFilesViewModel vm, int index) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("¿Copiar horario?"),
+        content: Text(
+          "Se aplicará el horario de ${vm.weekSchedules[index].dayName} a todos los demás días.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancelar"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              vm.copyToAll(index);
+              Navigator.pop(context);
+            },
+            child: const Text("Copiar a todos"),
+          ),
         ],
       ),
     );
