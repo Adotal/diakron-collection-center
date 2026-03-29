@@ -2,9 +2,9 @@ import 'package:diakron_collection_center/ui/core/themes/colors.dart';
 import 'package:diakron_collection_center/ui/core/themes/dimens.dart';
 import 'package:diakron_collection_center/ui/core/ui/custom_text_form_field.dart';
 import 'package:diakron_collection_center/ui/upload_files/view_models/upload_files_viewmodel.dart';
+import 'package:diakron_collection_center/ui/upload_files/widgets/file_picker_tile.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:open_filex/open_filex.dart';
 import 'package:provider/provider.dart';
 
 // Company data
@@ -209,17 +209,17 @@ class UploadFilesStep3Page extends StatelessWidget {
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 20),
-        _FilePickerTile(
+        FilePickerTile(
           label: "Identificación Representante",
           path: vm.pathIdRep,
           onPick: () => _pickPDF(context, 'pathIdRep'),
         ),
-        _FilePickerTile(
+        FilePickerTile(
           label: "Comprobante de Domicilio",
           path: vm.pathProofAddress,
           onPick: () => _pickPDF(context, 'pathProofAddress'),
         ),
-        _FilePickerTile(
+        FilePickerTile(
           label: "Constancia Situación Fiscal",
           path: vm.pathTaxCertificate,
           onPick: () => _pickPDF(context, 'pathTaxCertificate'),
@@ -245,59 +245,5 @@ class UploadFilesStep3Page extends StatelessWidget {
       // If its ok the size, save current file path
       context.read<UploadFilesViewModel>().updatePath(field, file.path);
     }
-  }
-}
-
-class _FilePickerTile extends StatelessWidget {
-  final String label;
-  final String? path;
-  final VoidCallback onPick;
-
-  const _FilePickerTile({required this.label, this.path, required this.onPick});
-
-  @override
-  Widget build(BuildContext context) {
-    bool hasFile = path != null;
-
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: hasFile ? Colors.green : Colors.grey.shade300),
-      ),
-      color: hasFile ? Colors.green.shade50 : Colors.grey.shade50,
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: Icon(
-          hasFile ? Icons.picture_as_pdf : Icons.upload_file,
-          color: hasFile ? Colors.green : Colors.grey,
-        ),
-        title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-        subtitle: Text(
-          hasFile
-              ? "Presiona para cambiar archivo"
-              : "Toca para seleccionar PDF",
-          style: TextStyle(
-            fontSize: 12,
-            color: hasFile ? Colors.green.shade700 : Colors.grey,
-          ),
-        ),
-        // BOTÓN PARA ABRIR EL DOCUMENTO
-        trailing: hasFile
-            ? IconButton(
-                icon: const Icon(Icons.visibility, color: Colors.blue),
-                onPressed: () async {
-                  // Lógica para abrir el archivo local
-                  if (path != null) {
-                    await OpenFilex.open(path!);
-                  }
-                },
-                tooltip: "Ver documento",
-              )
-            : const Icon(Icons.chevron_right),
-        onTap:
-            onPick, // El área general sigue sirviendo para cambiar el archivo
-      ),
-    );
   }
 }
