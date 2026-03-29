@@ -26,6 +26,9 @@ class UploadFilesViewModel extends ChangeNotifier {
   final UserRepository _userRepository;
   final AuthRepository _authRepository;
 
+  // Store days open
+  Set<int> daysOpen = {};
+
   // Its null while no error is detected
   String? timeErrorMsj;
 
@@ -35,12 +38,24 @@ class UploadFilesViewModel extends ChangeNotifier {
   final step3FormKey = GlobalKey<FormState>();
 
   bool validateStep1() {
-    if (openTime == null || closeTime == null) {
-      timeErrorMsj = 'Ambos horarios deben ser llenados';
+
+    _logger.w(genScheduleMap());
+
+    if (daysOpen.isEmpty) {
+      timeErrorMsj = 'Debe haber al menos un día de operación';
       notifyListeners();
       return false;
     }
 
+    // Iterate open days and check all all filled
+    for (int i = 0; i < daysOpen.length; i++) {
+      if (weekSchedules[daysOpen.elementAt(i)].isUncomplete()) {
+        timeErrorMsj = 'Todos los horarios deben ser llenados';
+        notifyListeners();
+        return false;
+      }
+    }
+    timeErrorMsj = null;
     return step1FormKey.currentState?.validate() ?? false;
   }
 
@@ -102,22 +117,16 @@ class UploadFilesViewModel extends ChangeNotifier {
   String? pathIdRep;
   String? pathProofAddress;
   String? pathTaxCertificate;
-  String? openTime = '07:00';
-  String? closeTime = '15:00';
 
   final _logger = Logger();
   late CollectionCenter _collectionCenter = CollectionCenter();
 
+  String timeOfDaytoString(TimeOfDay value) {
+    return '${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}';
+  }
+
   void updatePath(String field, dynamic value) {
     switch (field) {
-      case 'openTime':
-        openTime =
-            '${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}';
-        break;
-      case 'closeTime':
-        closeTime =
-            '${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}';
-        break;
       case 'pathIdRep':
         pathIdRep = value;
         break;
@@ -146,12 +155,12 @@ class UploadFilesViewModel extends ChangeNotifier {
       rfc: rfcController.text,
       taxRegime: taxRegimeController.text,
       taxpayerType: currentType.label,
+      scheduleMap: genScheduleMap(),
+      postCode: postCodeController.text,
       clabe: clabeController.text,
       billingEmail: billingEmailController.text,
       bank: bankController.text,
       address: addressController.text,
-      openTime: openTime,
-      closeTime: closeTime,
       pathIdRep: pathIdRep,
       pathProofAddress: pathProofAddress,
       pathTaxCertificate: pathTaxCertificate,
@@ -266,6 +275,66 @@ class UploadFilesViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void updateTime(int index, bool isOpenTime, TimeOfDay time) {
+    if (isOpenTime) {
+      weekSchedules[index].openTime = time;
+    } else {
+      weekSchedules[index].closeTime = time;
+    }
+    notifyListeners();
+  }
+
+  String? getErrorMessage(int index) {
+    final day = weekSchedules[index];
+    if (day.isOpen && day.openTime != null && day.closeTime != null) {
+      final start = day.openTime!.hour * 60 + day.openTime!.minute;
+      final end = day.closeTime!.hour * 60 + day.closeTime!.minute;
+      if (end <= start) {
+        weekSchedules[index].closeTime = null;
+        return "El cierre debe ser después de la apertura";
+      }
+    }
+    return null;
+  }
+
+  // NEW SEGMENTED BUTTON
+
+  // Tu lista de modelos (7 días)
+  final List<DaySchedule> weekSchedules = List.generate(
+    7,
+    (index) => DaySchedule(dayName: _getDayName(index)),
+  );
+
+  void onDaysChanged(Set<int> newSelection) {
+    daysOpen = newSelection;
+
+    // Sincronizamos el booleano isOpen en nuestros modelos
+    for (int i = 0; i < weekSchedules.length; i++) {      
+      weekSchedules[i].isOpen = daysOpen.contains(i);
+      // If not contains make it null
+      weekSchedules[i].deleteTimesOnClosed();
+    }
+    notifyListeners();
+  }
+
+  static String _getDayName(int i) => [
+    'Lunes',
+    'Martes',
+    'Miércoles',
+    'Jueves',
+    'Viernes',
+    'Sábado',
+    'Domingo',
+  ][i];
+
+  Map<String, dynamic>? genScheduleMap() {
+    final Map<String, dynamic> scheduleMap = {
+      for (var day in weekSchedules) 
+      day.dayName: day.toJson(),
+    };
+    return scheduleMap;
+  }
 }
 
 class Validators {
@@ -335,5 +404,41 @@ class Validators {
     }
     final bool postCodeValid = RegExp(r'^\d{5}$').hasMatch(value ?? '');
     return postCodeValid ? null : 'Código postal debe tener 5 dígitos';
+  }
+}
+
+// Class to manage open times of week
+class DaySchedule {
+  final String dayName;
+  bool isOpen;
+  TimeOfDay? openTime;
+  TimeOfDay? closeTime;
+
+  DaySchedule({
+    required this.dayName,
+    this.isOpen = false,
+    this.openTime,
+    this.closeTime,
+  });
+
+  void deleteTimesOnClosed(){
+    if(!isOpen){
+      openTime = closeTime = null;
+    }
+  }
+
+  bool isUncomplete() {
+    return (openTime == null || closeTime == null);
+  }
+
+  // Convierte el objeto a un mapa compatible con JSONB
+  Map<String, dynamic> toJson() => {
+    'isOpen': isOpen,
+    'open': openTime != null ? timeOfDaytoString(openTime!) : null,
+    'close': closeTime != null ? timeOfDaytoString(closeTime!) : null,
+  };
+
+  String timeOfDaytoString(TimeOfDay value) {
+    return '${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}';
   }
 }

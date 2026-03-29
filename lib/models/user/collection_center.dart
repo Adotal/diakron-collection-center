@@ -15,8 +15,6 @@ class CollectionCenter {
     this.taxRegime,
     this.taxpayerType,
     this.commercialName,
-    this.openTime,
-    this.closeTime,
     this.address,
     this.billingEmail,
     this.bank,
@@ -24,6 +22,8 @@ class CollectionCenter {
     this.pathIdRep,
     this.pathProofAddress,
     this.pathTaxCertificate,
+    this.scheduleMap,
+    this.postCode,
   });
 
   final String? id;
@@ -36,6 +36,8 @@ class CollectionCenter {
   final String? phoneNumber;
   final String? curpRep;
   final String? password;
+  final String? postCode;
+  final Map<String, dynamic>? scheduleMap;
 
   // Operation and Bank
   final String? companyName;
@@ -43,8 +45,6 @@ class CollectionCenter {
   final String? taxRegime;
   final String? taxpayerType;
   final String? commercialName;
-  final String? openTime; // Stored as String for easy JSON conversion
-  final String? closeTime;
   final String? address;
   final String? billingEmail;
   final String? bank;
@@ -69,8 +69,6 @@ class CollectionCenter {
     required this.taxRegime,
     required this.taxpayerType,
     required this.commercialName,
-    required this.openTime,
-    required this.closeTime,
     required this.address,
     required this.billingEmail,
     required this.bank,
@@ -78,6 +76,8 @@ class CollectionCenter {
     required this.pathIdRep,
     required this.pathProofAddress,
     required this.pathTaxCertificate,
+    required this.scheduleMap,
+    required this.postCode,
   });
   // Create a copy with updated fields (essential for ViewModels)
   CollectionCenter copyWith({
@@ -96,6 +96,8 @@ class CollectionCenter {
     String? openTime,
     String? closeTime,
     String? address,
+    Map<String, dynamic>? scheduleMap,
+    String? postCode,
     String? billingEmail,
     String? bank,
     String? clabe,
@@ -118,8 +120,7 @@ class CollectionCenter {
       taxRegime: taxRegime ?? this.taxRegime,
       taxpayerType: taxpayerType ?? this.taxpayerType,
       commercialName: commercialName ?? this.commercialName,
-      openTime: openTime ?? this.openTime,
-      closeTime: closeTime ?? this.closeTime,
+      scheduleMap: scheduleMap ?? this.scheduleMap,
       address: address ?? this.address,
       billingEmail: billingEmail ?? this.billingEmail,
       bank: bank ?? this.bank,
@@ -127,6 +128,7 @@ class CollectionCenter {
       pathIdRep: pathIdRep ?? this.pathIdRep,
       pathProofAddress: pathProofAddress ?? this.pathProofAddress,
       pathTaxCertificate: pathTaxCertificate ?? this.pathTaxCertificate,
+      postCode: postCode ?? this.postCode,
     );
   }
 
@@ -146,8 +148,8 @@ class CollectionCenter {
       'tax_regime': taxRegime,
       'taxpayer_type': taxpayerType,
       'commercial_name': commercialName,
-      'open_time': openTime,
-      'close_time': closeTime,
+      'post_code': postCode,
+      'schedule': scheduleMap,
       'address': address,
       'billing_email': billingEmail,
       'bank': bank,

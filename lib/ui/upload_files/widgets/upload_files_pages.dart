@@ -3,6 +3,7 @@ import 'package:diakron_collection_center/ui/core/themes/dimens.dart';
 import 'package:diakron_collection_center/ui/core/ui/custom_text_form_field.dart';
 import 'package:diakron_collection_center/ui/upload_files/view_models/upload_files_viewmodel.dart';
 import 'package:diakron_collection_center/ui/upload_files/widgets/file_picker_tile.dart';
+import 'package:diakron_collection_center/ui/upload_files/widgets/time_picker_tile.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -51,38 +52,198 @@ class UploadFilesStep1Page extends StatelessWidget {
             validator: Validators.postCode,
           ),
 
+          CustomTextFormField(
+            labelText: "CURP del representante legal",
+            controller: vm.curpController,
+            validator: Validators.curp,
+          ),
+
+          Column(
+            children: [
+              Text('Días de operación'),
+              SizedBox(height: 10,),
+              // Day selector
+              ListenableBuilder(
+                listenable: vm,
+                builder: (context, _) {
+                  return SegmentedButton<int>(
+                    segments: const [
+                      ButtonSegment(value: 0, label: Text('Lu')),
+                      ButtonSegment(value: 1, label: Text('Ma')),
+                      ButtonSegment(value: 2, label: Text('Mi')),
+                      ButtonSegment(value: 3, label: Text('Ju')),
+                      ButtonSegment(value: 4, label: Text('Vi')),
+                      ButtonSegment(value: 5, label: Text('Sá')),
+                      ButtonSegment(value: 6, label: Text('Do')),
+                    ],
+                    showSelectedIcon: false,
+                    emptySelectionAllowed: true,
+                    multiSelectionEnabled: true,
+                    selected: vm.daysOpen,
+                    onSelectionChanged: (newSelection) =>
+                        vm.onDaysChanged(newSelection),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 20),              
+
+              // 2. La lista de horarios dinámicos
+              ListenableBuilder(
+                listenable: vm,
+                builder: (context, _) {
+                  // Creamos la lista de widgets basada en los días seleccionados
+                  final selectedIndices = vm.daysOpen.toList()..sort();
+
+                  return Column(
+                    children: selectedIndices.map((index) {
+                      final error = vm.getErrorMessage(index);
+                      final day = vm.weekSchedules[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Column(
+                                children: [
+                                  ListTile(
+                                    title: Text(
+                                      day.dayName,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  if (day.isOpen) ...[
+                                    const Divider(height: 1),
+                                    TimePickerTile(
+                                      label: "Hora de apertura",
+                                      time: day.openTime,
+                                      onTap: () async {
+                                        final t = await showTimePicker(
+                                          context: context,
+                                          initialTime: TimeOfDay.now(),
+                                        );
+                                        if (t != null) {
+                                          vm.updateTime(index, true, t);
+                                        }
+                                      },
+                                    ),
+                                    TimePickerTile(
+                                      label: "Hora de Cierre",
+                                      time: day.closeTime,
+                                      onTap: () async {
+                                        final t = await showTimePicker(
+                                          context: context,
+                                          initialTime: TimeOfDay.now(),
+                                        );
+                                        if (t != null) {
+                                          vm.updateTime(index, false, t);
+                                        }
+                                      },
+                                    ),
+                                    if (error != null)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          bottom: 8,
+                                        ),
+                                        child: Text(
+                                          error,
+                                          style: const TextStyle(
+                                            color: Colors.red,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // ListenableBuilder(
+          //   listenable: vm,
+          //   builder: (context, child) {
+          //     return Column(
+          //       children: List.generate(vm.weekSchedules.length, (index) {
+          //         final day = vm.weekSchedules[index];
+          //         final error = vm.getErrorMessage(index);
+
+          //         return Card(
+          //           margin: const EdgeInsets.symmetric(
+          //             vertical: 8,
+          //             horizontal: 16,
+          //           ),
+          //           child: Column(
+          //             children: [
+          //               ListTile(
+          //                 title: Text(
+          //                   day.dayName,
+          //                   style: const TextStyle(fontWeight: FontWeight.bold),
+          //                 ),
+          //                 subtitle: Text(day.isOpen ? "Abierto" : "Cerrado"),
+          //               ),
+          //               if (day.isOpen) ...[
+          //                 const Divider(height: 1),
+          //                 TimePickerTile(
+          //                   label: "Apertura",
+          //                   time: day.openTime,
+          //                   onTap: () async {
+          //                     final t = await showTimePicker(
+          //                       context: context,
+          //                       initialTime: TimeOfDay.now(),
+          //                     );
+          //                     if (t != null) vm.updateTime(index, true, t);
+          //                   },
+          //                 ),
+          //                 TimePickerTile(
+          //                   label: "Cierre",
+          //                   time: day.closeTime,
+          //                   onTap: () async {
+          //                     final t = await showTimePicker(
+          //                       context: context,
+          //                       initialTime: TimeOfDay.now(),
+          //                     );
+          //                     if (t != null) vm.updateTime(index, false, t);
+          //                   },
+          //                 ),
+          //                 if (error != null)
+          //                   Padding(
+          //                     padding: const EdgeInsets.only(bottom: 8),
+          //                     child: Text(
+          //                       error,
+          //                       style: const TextStyle(
+          //                         color: Colors.red,
+          //                         fontSize: 12,
+          //                       ),
+          //                     ),
+          //                   ),
+          //               ],
+          //             ],
+          //           ),
+          //         );
+          //       }),
+          //     );
+          //   },
+          // ),
           ListenableBuilder(
             listenable: vm,
             builder: (context, child) {
               final timeErrorMsj = vm.timeErrorMsj;
               return Column(
                 children: [
-                  ListTile(
-                    title: Text(
-                      "Horario de apertura: ${vm.openTime ?? '--:--'}",
-                    ),
-                    trailing: const Icon(Icons.access_time),
-                    onTap: () async {
-                      final time = await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay.now(),
-                      );
-                      if (time != null) vm.updatePath('openTime', time);
-                    },
-                  ),
-                  ListTile(
-                    title: Text(
-                      "Horario de cierre: ${vm.closeTime ?? '--:--'}",
-                    ),
-                    trailing: const Icon(Icons.access_time),
-                    onTap: () async {
-                      final time = await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay.now(),
-                      );
-                      if (time != null) vm.updatePath('closeTime', time);
-                    },
-                  ),
                   if (timeErrorMsj != null)
                     Text(
                       timeErrorMsj,
@@ -94,11 +255,6 @@ class UploadFilesStep1Page extends StatelessWidget {
             },
           ),
 
-          CustomTextFormField(
-            labelText: "CURP del representante",
-            controller: vm.curpController,
-            validator: Validators.curp,
-          ),
         ],
       ),
     );
@@ -115,7 +271,7 @@ class UploadFilesStep2Page extends StatelessWidget {
     return Form(
       key: vm.step2FormKey,
       child: ListView(
-        padding: const EdgeInsets.all(24),        
+        padding: const EdgeInsets.all(24),
         children: [
           const Text(
             "Información fiscal",
@@ -133,32 +289,31 @@ class UploadFilesStep2Page extends StatelessWidget {
 
           Text(
             style: TextStyle(fontSize: Dimens.fontMedium),
-            "Tipo de contribuyente empresa"),
+            "Tipo de contribuyente empresa",
+          ),
           SizedBox(height: 10),
 
           ListenableBuilder(
             listenable: vm,
             builder: (context, _) {
-              return
-               RadioGroup<TaxpayerType>(
+              return RadioGroup<TaxpayerType>(
                 groupValue: vm.currentType,
                 onChanged: (TaxpayerType? value) {
                   vm.setTaxpayerType(value);
                 },
-                child: const
-              Column(
-                children: [
-                  RadioListTile<TaxpayerType>(
-                    title: Text("Persona Moral"),
-                    value: TaxpayerType.moral,
-                    activeColor: AppColors.greenDiakron1,
-                  ),
-                  RadioListTile<TaxpayerType>(
-                    title: Text("Persona Física"),
-                    value: TaxpayerType.physical,
-                    activeColor: AppColors.greenDiakron1,
-                  ),
-                ],
+                child: const Column(
+                  children: [
+                    RadioListTile<TaxpayerType>(
+                      title: Text("Persona Moral"),
+                      value: TaxpayerType.moral,
+                      activeColor: AppColors.greenDiakron1,
+                    ),
+                    RadioListTile<TaxpayerType>(
+                      title: Text("Persona Física"),
+                      value: TaxpayerType.physical,
+                      activeColor: AppColors.greenDiakron1,
+                    ),
+                  ],
                 ),
               );
             },
