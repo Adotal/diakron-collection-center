@@ -9,5 +9,6 @@ abstract final class Routes {
   static const uploadData = '/upload_data/step1';
   static const uploadData2 = '/upload_data/step2';
   static const uploadData3 = '/upload_data/step3';
+  static const privacyPolicy = '/upload_data/privacy-policy';
   static const waitingApproval = '/waiting_approval';
 }

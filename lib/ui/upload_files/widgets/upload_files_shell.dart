@@ -12,6 +12,9 @@ import 'package:provider/provider.dart';
 
 class UploadFilesShell extends StatelessWidget {
   final Widget child;
+
+  static const int totalPages = 4;
+
   const UploadFilesShell({super.key, required this.child});
 
   @override
@@ -19,10 +22,13 @@ class UploadFilesShell extends StatelessWidget {
     // 1. Obtener la ubicación para la lógica de progreso y botones
     final String location = GoRouterState.of(context).matchedLocation;
 
+    final vm = context.read<UploadFilesViewModel>();
+
     // Calcular progreso (33%, 66%, 100%)
-    double progress = 0.33;
-    if (location.endsWith('2')) progress = 0.66;
-    if (location.endsWith('3')) progress = 1.0;
+    double progress = 0;
+    if (location.endsWith('2')) progress = 0.33;
+    if (location.endsWith('3')) progress = 0.66;
+    if (location.startsWith(Routes.privacyPolicy)) progress = 0.95;
 
     return Scaffold(
       backgroundColor: AppColors.greenDiakron1,
@@ -101,91 +107,114 @@ class UploadFilesShell extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.only(topLeft: Radius.circular(45.0)),
               ),
-              child:
-              context.watch<UploadFilesViewModel>().isProcessing ?
-              _LoadingView() :
-               Column(
-                children: [
-                  // Contenido de la página (Step 1, 2 o 3)
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(45.0),
-                      ),
-                      child: child,
-                    ),
-                  ),
-
-                  // SECCIÓN DE BOTONES (Fija en la parte inferior del área blanca)
-                  Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: context.watch<UploadFilesViewModel>().isProcessing
+                  ? _LoadingView()
+                  : Column(
                       children: [
-                        if (!location.endsWith('1'))
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color.fromARGB(
-                                255,
-                                37,
-                                79,
-                                13,
-                              ),
-                              foregroundColor: Colors.white,
+                        // Contenido de la página (Step 1, 2 o 3)
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(45.0),
                             ),
-                            onPressed: () {
-                              if (location.endsWith('3')) {
-                                context.go(Routes.uploadData2);
-                              } else if (location.endsWith('2')) {
-                                context.go(Routes.uploadData);
-                              }
-                            },
-                            child: Text('Anterior'),
-                          )
-                        else
-                          const SizedBox.shrink(),
-
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.greenDiakron1,
-                            foregroundColor: Colors.white,
+                            child: child,
                           ),
-                          onPressed: () {
-                            final vm = context.read<UploadFilesViewModel>();
+                        ),
 
-                            if (location.endsWith('1')) {
-                              if (vm.validateStep1()) {
-                                vm.timeErrorMsj = null;
-                                context.go(Routes.uploadData2);
-                              }
-                            } else if (location.endsWith('2')) {
-                              if (vm.validateStep2()) {
-                                context.go(Routes.uploadData3);
-                              }
-                            } else {
-                              if (vm.validateStep3()) {
-                                vm.completeRegistration();
-                                context.go(Routes.login);
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      "Por favor, sube todos los documentos",
+                        // SECCIÓN DE BOTONES (Fija en la parte inferior del área blanca)
+                        Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              if (!location.endsWith('1'))
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color.fromARGB(
+                                      255,
+                                      37,
+                                      79,
+                                      13,
                                     ),
+                                    foregroundColor: Colors.white,
                                   ),
-                                );
-                              }
-                            }
-                          },
-                          child: Text(
-                            location.endsWith('3') ? "Finalizar" : "Siguiente",
+                                  onPressed: () {
+                                    if (location == Routes.privacyPolicy) {
+                                      context.go(Routes.uploadData3);
+                                    } else if (location.endsWith('3')) {
+                                      context.go(Routes.uploadData2);
+                                    } else if (location.endsWith('2')) {
+                                      context.go(Routes.uploadData);
+                                    }
+                                  },
+                                  child: Text('Anterior'),
+                                )
+                              else
+                                const SizedBox.shrink(),
+
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.greenDiakron1,
+                                  foregroundColor: Colors.white,
+                                  disabledForegroundColor: Colors.white,
+                                  disabledBackgroundColor: Colors.grey,
+                                ),
+                                // Disabled if in last page and not accepted terms and conditions
+                                onPressed: 
+                                (location == Routes.privacyPolicy && !vm.isAccepted) ?
+                                null :
+                                () {
+
+                                // final vm = context
+                                    // .read<UploadFilesViewModel>();
+                                if(location == Routes.privacyPolicy && !vm.isAccepted){
+                                  null;
+                                }
+
+                                if (location.endsWith('1')) {
+                                  if (vm.validateStep1()) {
+                                    vm.timeErrorMsj = null;
+                                    context.go(Routes.uploadData2);
+                                  }
+                                } else if (location.endsWith('2')) {
+                                  if (vm.validateStep2()) {
+                                    context.go(Routes.uploadData3);
+                                  }
+                                } else if (location.endsWith('3')) {
+                                  if (vm.validateStep3()) {
+                                    // Go Last page
+                                    context.go(Routes.privacyPolicy);
+                                  } else {
+                                    ScaffoldMessenger.of(
+                                      context,
+                                    ).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          "Por favor, sube todos los documentos",
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                } else {
+                                  if (vm.isAccepted) {
+                                    // Upload all files
+                                    vm.completeRegistration();
+                                    // Router will automatically redirect to Waiting page, home or denied
+                                    context.go(Routes.login);                                    
+                                  }
+                                }
+                                },
+                                child: Text(
+                                  location.endsWith(Routes.privacyPolicy)
+                                      ? "Finalizar"
+                                      : "Siguiente",
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
             ),
           ),
         ],
@@ -198,14 +227,19 @@ class UploadFilesShell extends StatelessWidget {
 class _LoadingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final message = context.select<UploadFilesViewModel, String>((vm) => vm.uploadMessage);
+    final message = context.select<UploadFilesViewModel, String>(
+      (vm) => vm.uploadMessage,
+    );
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const CircularProgressIndicator(color: AppColors.greenDiakron1),
           const SizedBox(height: 24),
-          Text(message, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+          Text(
+            message,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
         ],
       ),
     );

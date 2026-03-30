@@ -13,6 +13,7 @@ import 'package:diakron_collection_center/ui/auth/sigunp/view_models/signup_view
 import 'package:diakron_collection_center/ui/auth/sigunp/widgets/signup_screen.dart';
 import 'package:diakron_collection_center/ui/home/view_models/home_viewmodel.dart';
 import 'package:diakron_collection_center/ui/home/widgets/home_screen.dart';
+import 'package:diakron_collection_center/ui/upload_files/widgets/privacy_policy_screen.dart';
 import 'package:diakron_collection_center/ui/upload_files/widgets/upload_files_pages.dart';
 import 'package:diakron_collection_center/ui/upload_files/widgets/upload_files_shell.dart';
 import 'package:diakron_collection_center/ui/wating_approval/widgets/waiting_approval_screen.dart';
@@ -21,7 +22,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 GoRouter router(AuthRepository authRepository, UserRepository userRepository) => GoRouter(
-  initialLocation: Routes.home,
+  initialLocation: Routes.login,
   debugLogDiagnostics: true, // TESTING
   refreshListenable: Listenable.merge([
    authRepository,
@@ -85,6 +86,10 @@ GoRouter router(AuthRepository authRepository, UserRepository userRepository) =>
         GoRoute(
           path: Routes.uploadData3,
           builder: (context, state) => const UploadFilesStep3Page(),
+        ),
+        GoRoute(
+          path: Routes.privacyPolicy,
+          builder: (context, state) => const PrivacyPolicyScreen(),
         ),
       ],
     ),

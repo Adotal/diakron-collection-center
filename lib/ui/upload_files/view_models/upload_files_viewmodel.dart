@@ -5,6 +5,7 @@ import 'package:diakron_collection_center/data/repositories/user/user_repository
 import 'package:diakron_collection_center/models/user/collection_center.dart';
 import 'package:diakron_collection_center/utils/result.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 
 enum TaxpayerType {
@@ -21,7 +22,9 @@ class UploadFilesViewModel extends ChangeNotifier {
     required UserRepository userRepository,
     required AuthRepository authRepository,
   }) : _userRepository = userRepository,
-       _authRepository = authRepository;
+       _authRepository = authRepository {
+    init();
+  }
 
   final UserRepository _userRepository;
   final AuthRepository _authRepository;
@@ -104,6 +107,7 @@ class UploadFilesViewModel extends ChangeNotifier {
     commercialNameController.dispose();
     curpController.dispose();
     addressController.dispose();
+    postCodeController.dispose(); // <-- Te faltaba este
     billingEmailController.dispose();
     rfcController.dispose();
     taxRegimeController.dispose();
@@ -347,6 +351,46 @@ class UploadFilesViewModel extends ChangeNotifier {
       for (var day in weekSchedules) day.dayName: day.toJson(),
     };
     return scheduleMap;
+  }
+
+  //------------------------------TERMS & CONDITIONS-------------------
+  bool _isAccepted = false;
+  bool get isAccepted => _isAccepted;
+  String? _privacyMd;
+  String? _termsMd;
+  bool _isLoading = true;
+
+  String get privacyData => _privacyMd ?? "";
+  String get termsData => _termsMd ?? "";
+  bool get isLoading => _isLoading;
+
+  Future<void> init() async {
+    // Si ya tienen datos, no cargamos de nuevo
+    if (_privacyMd != null && _termsMd != null) {
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    try {
+      // Cargamos ambos en paralelo
+      final results = await Future.wait([
+        rootBundle.loadString('assets/privacy_policy.md'),
+        rootBundle.loadString('assets/terms_and_conditions.md'),
+      ]);
+
+      _privacyMd = results[0];
+      _termsMd = results[1];
+    } catch (e) {
+      debugPrint("Error cargando MD: $e");
+    }
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  void setAccepted(bool value) {
+    _isAccepted = value;
+    notifyListeners();
   }
 }
 
