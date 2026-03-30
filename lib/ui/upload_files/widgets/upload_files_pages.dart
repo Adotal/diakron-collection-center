@@ -81,7 +81,7 @@ class UploadFilesStep1Page extends StatelessWidget {
                     title: Text(type['waste_type']),
                     value: vm.selectedWasteIds.contains(type['id']),
                     onChanged: (bool? checked) {
-                      vm.sonSelectedWasteType(checked, type);
+                      vm.onSelectedWasteType(checked, type);
                     },
                   );
                 },

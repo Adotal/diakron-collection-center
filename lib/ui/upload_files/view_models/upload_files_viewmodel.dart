@@ -422,7 +422,7 @@ class UploadFilesViewModel extends ChangeNotifier {
     // {'id': 4, 'waste_type': 'VIDRIO'},
   ];
 
-  void sonSelectedWasteType(bool? checked, type) {
+  void onSelectedWasteType(bool? checked, type) {
     if (checked == true) {
       selectedWasteIds.add(type['id']);
     } else {
