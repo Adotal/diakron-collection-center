@@ -58,6 +58,39 @@ class UploadFilesStep1Page extends StatelessWidget {
             validator: Validators.curp,
           ),
 
+          Text('Selecciona los tipos de residuos que recibe el centro'),
+        
+
+          ListenableBuilder(
+            listenable: vm,
+            builder: (context, child) {
+
+              if(vm.allWasteTypes.isEmpty){
+                return Center(child: CircularProgressIndicator(),);
+              }
+
+              return ListView.builder(
+                shrinkWrap: true,
+                padding: EdgeInsets.all(10),
+                itemCount: vm
+                    .allWasteTypes
+                    .length, // List fetched from 'waste_types' table
+                itemBuilder: (context, index) {
+                  final type = vm.allWasteTypes[index];
+                  return CheckboxListTile(
+                    title: Text(type['waste_type']),
+                    value: vm.selectedWasteIds.contains(type['id']),
+                    onChanged: (bool? checked) {
+                      vm.sonSelectedWasteType(checked, type);
+                    },
+                  );
+                },
+              );
+            },
+          ),
+
+          SizedBox(height: 10,),
+
           Column(
             children: [
               Text('Selecciona los días de operación de la empresa'),

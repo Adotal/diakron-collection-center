@@ -43,11 +43,19 @@ class UploadFilesViewModel extends ChangeNotifier {
   bool validateStep1() {
     _logger.w(genScheduleMap());
 
+
+    if(selectedWasteIds.isEmpty) {
+      timeErrorMsj = 'Debe haber al menos un tipo de desecho aceptado';
+      notifyListeners();
+      return false;
+    }
+
     if (daysOpen.isEmpty) {
       timeErrorMsj = 'Debe haber al menos un día de operación';
       notifyListeners();
       return false;
     }
+
 
     // Iterate open days and check all all filled
     for (int i = 0; i < daysOpen.length; i++) {
@@ -211,6 +219,9 @@ class UploadFilesViewModel extends ChangeNotifier {
       'pathTaxCertificate',
     );
 
+    _updateProgress("Subiendo tipos de materiales");
+    await _userRepository.saveCenterCapabilities(centerId: _authRepository.userId!, selectedWasteIds: selectedWasteIds);
+
     // Database sync
     _updateProgress("Finalizando: Información del Centro de Acopio...");
 
@@ -365,6 +376,10 @@ class UploadFilesViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Future<void> init() async {
+
+
+    //------------------------CHARGE TERMSN AND CONDITIONS---------------
+
     // Si ya tienen datos, no cargamos de nuevo
     if (_privacyMd != null && _termsMd != null) {
       _isLoading = false;
@@ -385,12 +400,36 @@ class UploadFilesViewModel extends ChangeNotifier {
       debugPrint("Error cargando MD: $e");
     }
     _isLoading = false;
+
+
+    //------------------------CHECKBOX OF WASTE TYPES---------------
+    allWasteTypes = await _userRepository.fetchAllWasteTypes();
+
     notifyListeners();
   }
 
   void setAccepted(bool value) {
     _isAccepted = value;
     notifyListeners();
+  }
+
+  //----------------------WASTE TYPES CHECKBOX----------------------------
+  List<int> selectedWasteIds = [];
+  List<Map<String, dynamic>> allWasteTypes = [
+    // {'id': 1, 'waste_type': 'PLÁSTICO'},
+    // {'id': 2, 'waste_type': 'METAL'},
+    // {'id': 3, 'waste_type': 'PAPEL/CARTÓN'},
+    // {'id': 4, 'waste_type': 'VIDRIO'},
+  ];
+
+  void sonSelectedWasteType(bool? checked, type) {
+    if (checked == true) {
+      selectedWasteIds.add(type['id']);
+    } else {
+      selectedWasteIds.remove(type['id']);
+    }
+    notifyListeners();
+    _logger.w(selectedWasteIds);
   }
 }
 

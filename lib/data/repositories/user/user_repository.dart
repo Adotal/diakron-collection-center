@@ -67,4 +67,16 @@ class UserRepository extends ChangeNotifier {
     );
     return result;
   }
+
+  
+  Future<List<Map<String, dynamic>>> fetchAllWasteTypes() async {
+    return await _databaseService.fetchAllWasteTypes();
+  }
+
+
+  Future<void> saveCenterCapabilities(
+    {required String centerId,
+    required List<int> selectedWasteIds}) async {
+      await _databaseService.saveCenterCapabilities(centerId: centerId, selectedWasteIds: selectedWasteIds);
+    }
 }

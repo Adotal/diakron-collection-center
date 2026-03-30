@@ -93,4 +93,44 @@ class DatabaseService {
         .eq('id', id)
         .map((list) => list.first);
   }
+
+  Future<List<Map<String, dynamic>>> fetchAllWasteTypes() async {
+    try {
+      final data = await _supabase
+          .from('waste_types')
+          .select('*')
+          .order('waste_type', ascending: true); // Keeps the list alphabetical
+      _logger.d(data);
+      return List<Map<String, dynamic>>.from(data);
+    } catch (e) {
+      _logger.e(e);
+      return [{}];
+    }
+  }
+
+  // Inserts in intermediate table for waste types
+  Future<void> saveCenterCapabilities({
+    required String centerId,
+    required List<int> selectedWasteIds,
+  }) async {
+    try {
+      // 1. Clear old selections for this center
+      await _supabase
+          .from('collection_center_waste')
+          .delete()
+          .eq('id_collection_center', centerId);
+
+      // 2. Prepare the new rows
+      final newRows = selectedWasteIds
+          .map((id) => {'id_collection_center': centerId, 'id_waste_type': id})
+          .toList();
+
+      // 3. Bulk insert
+      if (newRows.isNotEmpty) {
+        await _supabase.from('collection_center_waste').insert(newRows);
+      }
+    } catch (e) {
+      _logger.e(e);
+    }
+  }
 }
