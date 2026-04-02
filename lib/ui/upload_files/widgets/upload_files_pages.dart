@@ -121,7 +121,7 @@ class UploadFilesStep1Page extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // 2. La lista de horarios dinámicos
+              // La lista de horarios dinámicos
               ListenableBuilder(
                 listenable: vm,
                 builder: (context, _) {

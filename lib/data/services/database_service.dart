@@ -75,7 +75,7 @@ class DatabaseService {
           .from('diakron_storage_private')
           .upload(path, file, fileOptions: const FileOptions(upsert: true));
 
-      return fullPath; // Retornamos el path para guardarlo en la DB
+      return path;
     } catch (e) {
       _logger.e("Upload failed: $e");
       return null;
