@@ -1,4 +1,5 @@
 import 'package:diakron_collection_center/data/repositories/auth/auth_repository.dart';
+import 'package:diakron_collection_center/data/repositories/user/user_repository.dart';
 import 'package:diakron_collection_center/routing/routes.dart';
 import 'package:diakron_collection_center/ui/auth/logout/view_models/logout_viewmodel.dart';
 import 'package:diakron_collection_center/ui/auth/logout/widgets/logout_button.dart';
@@ -75,6 +76,7 @@ class UploadFilesShell extends StatelessWidget {
                         LogoutButton(
                           viewModel: LogoutViewModel(
                             authRepository: context.read<AuthRepository>(),
+                      userRepository: context.read<UserRepository>() 
                           ),
                         ),
                       ],

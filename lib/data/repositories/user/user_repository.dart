@@ -11,16 +11,15 @@ class UserRepository extends ChangeNotifier {
 
   final DatabaseService _databaseService;
 
-  ValidationStatus? _validationStatus;
-  ValidationStatus? get validationStatus => _validationStatus;
+  ValidationStatus? validationStatus;
 
   Future<ValidationStatus> getValidationStatus(
     String userId, {
     bool forceRefresh = false,
   }) async {
     // 1. Return cache if available and we aren't forcing a refresh
-    if (_validationStatus != null && !forceRefresh) {
-      return _validationStatus!;
+    if (validationStatus != null && !forceRefresh) {
+      return validationStatus!;
     }
 
     try {
@@ -28,18 +27,18 @@ class UserRepository extends ChangeNotifier {
       final status = await _databaseService.getValidationStatus(userId);
 
       // 3. Update local state and notify the app
-      _validationStatus = status;
+      validationStatus = status;
       notifyListeners();
 
       return status;
     } catch (e) {
       // 4. Fallback/Error handling
-      return _validationStatus ?? ValidationStatus.uploading;
+      return validationStatus ?? ValidationStatus.uploading;
     }
   }
 
   void clearCache() {
-    _validationStatus = null;
+    validationStatus = null;
     notifyListeners();
   }
 
@@ -68,15 +67,17 @@ class UserRepository extends ChangeNotifier {
     return result;
   }
 
-  
   Future<List<Map<String, dynamic>>> fetchAllWasteTypes() async {
     return await _databaseService.fetchAllWasteTypes();
   }
 
-
-  Future<void> saveCenterCapabilities(
-    {required String centerId,
-    required List<int> selectedWasteIds}) async {
-      await _databaseService.saveCenterCapabilities(centerId: centerId, selectedWasteIds: selectedWasteIds);
-    }
+  Future<void> saveCenterCapabilities({
+    required String centerId,
+    required List<int> selectedWasteIds,
+  }) async {
+    await _databaseService.saveCenterCapabilities(
+      centerId: centerId,
+      selectedWasteIds: selectedWasteIds,
+    );
+  }
 }

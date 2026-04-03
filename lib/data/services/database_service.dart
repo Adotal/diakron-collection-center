@@ -71,7 +71,7 @@ class DatabaseService {
       // The path MUST start with the userId for the RLS to pass
       final String path = '$id/$fileName';
       // Usamos 'upsert: true' por si el usuario reintenta una subida fallida
-      final String fullPath = await _supabase.storage
+      await _supabase.storage
           .from('diakron_storage_private')
           .upload(path, file, fileOptions: const FileOptions(upsert: true));
 

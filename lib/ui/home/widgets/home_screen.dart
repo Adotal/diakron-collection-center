@@ -1,4 +1,5 @@
 import 'package:diakron_collection_center/data/repositories/auth/auth_repository.dart';
+import 'package:diakron_collection_center/data/repositories/user/user_repository.dart';
 import 'package:diakron_collection_center/ui/auth/logout/view_models/logout_viewmodel.dart';
 import 'package:diakron_collection_center/ui/auth/logout/widgets/logout_button.dart';
 import 'package:diakron_collection_center/ui/core/themes/colors.dart';
@@ -56,6 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   LogoutButton(
                     viewModel: LogoutViewModel(
                       authRepository: context.read<AuthRepository>(),
+                      userRepository: context.read<UserRepository>() 
                     ),
                   ),
                 ],

@@ -1,5 +1,7 @@
 import 'package:diakron_collection_center/data/repositories/auth/auth_repository.dart';
 import 'package:diakron_collection_center/data/repositories/user/user_repository.dart';
+import 'package:diakron_collection_center/ui/auth/logout/view_models/logout_viewmodel.dart';
+import 'package:diakron_collection_center/ui/auth/logout/widgets/logout_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -9,6 +11,12 @@ class WaitingApprovalPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        actions: [
+          LogoutButton(viewModel: LogoutViewModel(authRepository: context.read(),
+                      userRepository: context.read<UserRepository>() ))
+        ],
+      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(32.0),
