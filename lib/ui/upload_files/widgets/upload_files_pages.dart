@@ -59,18 +59,18 @@ class UploadFilesStep1Page extends StatelessWidget {
           ),
 
           Text('Selecciona los tipos de residuos que recibe el centro'),
-        
 
           ListenableBuilder(
             listenable: vm,
             builder: (context, child) {
-
-              if(vm.allWasteTypes.isEmpty){
-                return Center(child: CircularProgressIndicator(),);
+              if (vm.allWasteTypes.isEmpty) {
+                return Center(child: CircularProgressIndicator());
               }
 
               return ListView.builder(
                 shrinkWrap: true,
+                physics: const ClampingScrollPhysics(),
+
                 padding: EdgeInsets.all(10),
                 itemCount: vm
                     .allWasteTypes
@@ -89,7 +89,7 @@ class UploadFilesStep1Page extends StatelessWidget {
             },
           ),
 
-          SizedBox(height: 10,),
+          SizedBox(height: 10),
 
           Column(
             children: [
