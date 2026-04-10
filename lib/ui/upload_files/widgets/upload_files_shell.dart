@@ -76,7 +76,7 @@ class UploadFilesShell extends StatelessWidget {
                         LogoutButton(
                           viewModel: LogoutViewModel(
                             authRepository: context.read<AuthRepository>(),
-                      userRepository: context.read<UserRepository>() 
+                            userRepository: context.read<UserRepository>(),
                           ),
                         ),
                       ],
@@ -162,50 +162,51 @@ class UploadFilesShell extends StatelessWidget {
                                   disabledBackgroundColor: Colors.grey,
                                 ),
                                 // Disabled if in last page and not accepted terms and conditions
-                                onPressed: 
-                                (location == Routes.privacyPolicy && !vm.isAccepted) ?
-                                null :
-                                () {
+                                onPressed:
+                                    (location == Routes.privacyPolicy &&
+                                        !vm.isAccepted)
+                                    ? null
+                                    : () async {
+                                        // final vm = context
+                                        // .read<UploadFilesViewModel>();
+                                        if (location == Routes.privacyPolicy &&
+                                            !vm.isAccepted) {
+                                          null;
+                                        }
 
-                                // final vm = context
-                                    // .read<UploadFilesViewModel>();
-                                if(location == Routes.privacyPolicy && !vm.isAccepted){
-                                  null;
-                                }
-
-                                if (location.endsWith('1')) {
-                                  if (vm.validateStep1()) {
-                                    vm.timeErrorMsj = null;
-                                    context.go(Routes.uploadData2);
-                                  }
-                                } else if (location.endsWith('2')) {
-                                  if (vm.validateStep2()) {
-                                    context.go(Routes.uploadData3);
-                                  }
-                                } else if (location.endsWith('3')) {
-                                  if (vm.validateStep3()) {
-                                    // Go Last page
-                                    context.go(Routes.privacyPolicy);
-                                  } else {
-                                    ScaffoldMessenger.of(
-                                      context,
-                                    ).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          "Por favor, sube todos los documentos",
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                } else {
-                                  if (vm.isAccepted) {
-                                    // Upload all files
-                                    vm.completeRegistration();
-                                    // Router will automatically redirect to Waiting page, home or denied
-                                    context.go(Routes.login);                                    
-                                  }
-                                }
-                                },
+                                        if (location.endsWith('1')) {
+                                          if (vm.validateStep1()) {
+                                            vm.timeErrorMsj = null;
+                                            context.go(Routes.uploadData2);
+                                          }
+                                        } else if (location.endsWith('2')) {
+                                          if (vm.validateStep2()) {
+                                            context.go(Routes.uploadData3);
+                                          }
+                                        } else if (location.endsWith('3')) {
+                                          if (vm.validateStep3()) {
+                                            // Go Last page
+                                            context.go(Routes.privacyPolicy);
+                                          } else {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  "Por favor, sube todos los documentos",
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        } else {
+                                          if (vm.isAccepted) {
+                                            // Upload all files
+                                            await vm.completeRegistration
+                                                .execute();
+                                            context.go(Routes.guard);
+                                          }
+                                        }
+                                      },
                                 child: Text(
                                   location.endsWith(Routes.privacyPolicy)
                                       ? "Finalizar"

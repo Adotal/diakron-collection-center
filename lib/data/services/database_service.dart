@@ -1,6 +1,4 @@
 import 'dart:io';
-
-import 'package:diakron_collection_center/models/user/collection_center.dart';
 import 'package:diakron_collection_center/utils/result.dart';
 import 'package:logger/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -9,26 +7,21 @@ class DatabaseService {
   final SupabaseClient _supabase = Supabase.instance.client;
   final _logger = Logger();
 
-  Future<ValidationStatus> getValidationStatus(String userId) async {
-    _logger.w('User id: $userId');
+
+ Future<Result<Map<String, dynamic>>> getCollectionCenter() async {
     try {
-      // 1. Consultamos solo la columna necesaria para ahorrar ancho de banda
-      final data = await _supabase
-          .from('collection_centers')
-          .select('validation_status')
-          .eq('id', userId)
-          .single();
+      if (_supabase.auth.currentUser != null) {
+        final store = await _supabase
+            .from('full_collection_centers')
+            .select()
+            .eq('id', _supabase.auth.currentUser!.id)
+            .single();
 
-      // 2. Mapeamos el String de la DB al Enum que creaste
-      final String statusRaw = data['validation_status'] ?? 'UPLOADING';
-      _logger.w(data['validation_status']);
-
-      // Usamos el método estático que ya tienes en tu modelo
-      return CollectionCenter.parseStatus(statusRaw);
-    } catch (e) {
-      _logger.e('User id: $userId');
-      // Si hay error (ej. no existe el registro), asumimos que debe subir archivos
-      return ValidationStatus.uploading;
+        return Result.ok(store);
+      }
+      return Result.error(Exception('Null user'));
+    } on Exception catch (error) {
+      return Result.error(error);
     }
   }
 

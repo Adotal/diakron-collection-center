@@ -1,6 +1,8 @@
 // Routes
 abstract final class Routes {
-  static const home = '/';
+  static const homeRelative = 'home';
+  static const home = '/$homeRelative';
+  
   static const login = '/login';
   static const forgotpassword = '/forgotpassword';
   static const resetpassword = '/reset-password';  
@@ -11,4 +13,8 @@ abstract final class Routes {
   static const uploadData3 = '/upload_data/step3';
   static const privacyPolicy = '/upload_data/privacy-policy';
   static const waitingApproval = '/waiting_approval';
+
+
+  static const guardRelative = 'guard';
+  static const guard = '/$guardRelative';
 }

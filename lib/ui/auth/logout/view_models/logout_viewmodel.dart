@@ -18,8 +18,8 @@ class LogoutViewModel {
   late Command0 logout;
 
   Future<Result<void>> _logout() async {
-    // Free cached Validation Status
-    _userRepository.validationStatus = null;
+    // Clear cache
+    await _userRepository.clearCache();
     return await _authRepository.logout();
   }
 }

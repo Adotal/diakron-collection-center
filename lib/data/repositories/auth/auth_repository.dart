@@ -13,7 +13,7 @@ class AuthRepository extends ChangeNotifier {
   final AuthService _authService;
 
   // Provide the current user ID
-  String? get userId => _authService.currentUserId;
+  String get userId => _authService.currentUserId!;
   bool get isAuthenticated => (_authService.currentUser != null);
 
   bool _isRecoveringPassword = false;

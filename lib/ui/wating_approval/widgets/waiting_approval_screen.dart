@@ -1,8 +1,9 @@
-import 'package:diakron_collection_center/data/repositories/auth/auth_repository.dart';
 import 'package:diakron_collection_center/data/repositories/user/user_repository.dart';
+import 'package:diakron_collection_center/routing/routes.dart';
 import 'package:diakron_collection_center/ui/auth/logout/view_models/logout_viewmodel.dart';
 import 'package:diakron_collection_center/ui/auth/logout/widgets/logout_button.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class WaitingApprovalPage extends StatelessWidget {
@@ -43,13 +44,7 @@ class WaitingApprovalPage extends StatelessWidget {
                 icon: const Icon(Icons.refresh),
                 label: const Text("Recargar estado"),
                 onPressed: () async {
-                  final auth = context.read<AuthRepository>();
-                  final userRepo = context.read<UserRepository>();
-                  // Force a check to see if status changed to 'approved'
-                  await userRepo.getValidationStatus(
-                    auth.userId!,
-                    forceRefresh: true,
-                  );
+                  context.go(Routes.guard);
                 },
               ),
             ],

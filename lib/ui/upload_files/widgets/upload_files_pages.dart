@@ -1,9 +1,11 @@
+import 'package:diakron_collection_center/models/core/taxpayer_type/taxpayer_type.dart';
 import 'package:diakron_collection_center/ui/core/themes/colors.dart';
 import 'package:diakron_collection_center/ui/core/themes/dimens.dart';
 import 'package:diakron_collection_center/ui/core/ui/custom_text_form_field.dart';
 import 'package:diakron_collection_center/ui/upload_files/view_models/upload_files_viewmodel.dart';
 import 'package:diakron_collection_center/ui/upload_files/widgets/file_picker_tile.dart';
 import 'package:diakron_collection_center/ui/upload_files/widgets/time_picker_tile.dart';
+import 'package:diakron_collection_center/utils/validation/validators.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -441,17 +443,17 @@ class UploadFilesStep3Page extends StatelessWidget {
         const SizedBox(height: 20),
         FilePickerTile(
           label: "Identificación Representante",
-          path: vm.pathIdRep,
+          path: vm.collectionCenter!.pathIdRep,
           onPick: () => _pickPDF(context, 'pathIdRep'),
         ),
         FilePickerTile(
           label: "Comprobante de Domicilio",
-          path: vm.pathProofAddress,
+          path: vm.collectionCenter!.pathProofAddress,
           onPick: () => _pickPDF(context, 'pathProofAddress'),
         ),
         FilePickerTile(
           label: "Constancia Situación Fiscal",
-          path: vm.pathTaxCertificate,
+          path: vm.collectionCenter!.pathTaxCertificate,
           onPick: () => _pickPDF(context, 'pathTaxCertificate'),
         ),
       ],

@@ -1,7 +1,6 @@
 // Routes manager
 import 'package:diakron_collection_center/data/repositories/auth/auth_repository.dart';
 import 'package:diakron_collection_center/data/repositories/user/user_repository.dart';
-import 'package:diakron_collection_center/models/user/collection_center.dart';
 import 'package:diakron_collection_center/routing/routes.dart';
 import 'package:diakron_collection_center/ui/auth/forgot_password/view_models/forgot_password_viewmodel.dart';
 import 'package:diakron_collection_center/ui/auth/forgot_password/widgets/forgot_password_screen.dart';
@@ -11,6 +10,8 @@ import 'package:diakron_collection_center/ui/auth/reset_password/view_models/res
 import 'package:diakron_collection_center/ui/auth/reset_password/widgets/reset_password_screen.dart';
 import 'package:diakron_collection_center/ui/auth/sigunp/view_models/signup_viewmodel.dart';
 import 'package:diakron_collection_center/ui/auth/sigunp/widgets/signup_screen.dart';
+import 'package:diakron_collection_center/ui/guard/view_models/guard_viewmodel.dart';
+import 'package:diakron_collection_center/ui/guard/widgets/guard_screen.dart';
 import 'package:diakron_collection_center/ui/home/view_models/home_viewmodel.dart';
 import 'package:diakron_collection_center/ui/home/widgets/home_screen.dart';
 import 'package:diakron_collection_center/ui/upload_files/widgets/privacy_policy_screen.dart';
@@ -25,12 +26,23 @@ GoRouter router(
   AuthRepository authRepository,
   UserRepository userRepository,
 ) => GoRouter(
-  initialLocation: Routes.login,
+  initialLocation: Routes.guard,
   debugLogDiagnostics: true, // TESTING
   refreshListenable: Listenable.merge([authRepository, userRepository]),
   redirect: _redirect,
 
   routes: [
+
+    GoRoute(
+      path: Routes.guard,
+      builder: (context, state) {
+        final viewModel = GuardViewModel(
+          authRepository: context.read<AuthRepository>(),
+          userRepository: context.read<UserRepository>(),
+        );
+        return GuardScreen(viewModel: viewModel);
+      },
+    ),
     GoRoute(
       path: Routes.login,
       builder: (context, state) {
@@ -122,53 +134,33 @@ GoRouter router(
 );
 
 Future<String?> _redirect(BuildContext context, GoRouterState state) async {
-  final userRepo = context.read<UserRepository>();
   final authRepo = context.read<AuthRepository>();
   final bool loggedIn = authRepo.isAuthenticated;
 
-  // // Locations
-  final bool isAtLogin = state.matchedLocation == Routes.login;
-  final bool isAtReset = state.matchedLocation == Routes.resetpassword;
-  final bool isAtForgot = state.matchedLocation == Routes.forgotpassword;
-  final bool isAtSignup = state.matchedLocation == Routes.signup;
-
-  // 1. HIGHEST PRIORITY: Password Recovery
-  // If Supabase tells us we are in recovery mode, force the reset page.
+    // First check if recovering pswd
   if (authRepo.isRecoveringPassword) {
-    return isAtReset ? null : Routes.resetpassword;
+    return Routes.resetpassword;
   }
+  // Auth Check
+  final bool isAtAuthPage = [
+    Routes.login,
+    Routes.signup,
+    Routes.forgotpassword,
+    // Routes.resetpassword
+  ].contains(state.matchedLocation);
 
-  // 2. If not logged in, and not on an "Auth" page (login, signup, forgot), go to Login
   if (!loggedIn) {
-    if (isAtLogin || isAtForgot || isAtSignup || isAtReset) {
-      return null;
-    }
-    return Routes.login;
+    return isAtAuthPage ? null : Routes.login;
   }
 
   if (authRepo.isVerifyingAuth) {
     return null;
   }
-
-  //final ValidationStatus validationStatus = userRepo.validationStatus!;
-  final validationStatus = await userRepo.getValidationStatus(authRepo.userId!);
-
-  final bool atUploadData = state.matchedLocation.startsWith(
-    Routes.uploadDataRoot,
-  );
-
-  switch (validationStatus) {
-    case ValidationStatus.approved:
-      return Routes.home;
-    case ValidationStatus.uploading:
-      // If not already in a uploading proccess redirect to it
-      if (!atUploadData) {
-        return Routes.uploadData;
-      }
-    case ValidationStatus.pending:
-      return Routes.waitingApproval;
-    case ValidationStatus.denied:
-    // return Routes.denied;
+  
+  // If logged in but we are at Login, or we just started, go to the Guard
+  if (isAtAuthPage || state.matchedLocation == '/') {
+    return Routes.guard;
   }
+
   return null;
 }

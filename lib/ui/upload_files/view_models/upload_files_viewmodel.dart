@@ -1,20 +1,14 @@
 import 'dart:io';
-
 import 'package:diakron_collection_center/data/repositories/auth/auth_repository.dart';
 import 'package:diakron_collection_center/data/repositories/user/user_repository.dart';
-import 'package:diakron_collection_center/models/user/collection_center.dart';
+import 'package:diakron_collection_center/models/core/taxpayer_type/taxpayer_type.dart';
+import 'package:diakron_collection_center/models/core/validation_status/validation_status.dart';
+import 'package:diakron_collection_center/models/users/collection_center.dart';
+import 'package:diakron_collection_center/utils/command.dart';
 import 'package:diakron_collection_center/utils/result.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
-
-enum TaxpayerType {
-  moral('Persona Moral'),
-  physical('Persona Física');
-
-  final String label;
-  const TaxpayerType(this.label);
-}
 
 class UploadFilesViewModel extends ChangeNotifier {
   // Controllers live here to persist data between page swipes
@@ -23,11 +17,20 @@ class UploadFilesViewModel extends ChangeNotifier {
     required AuthRepository authRepository,
   }) : _userRepository = userRepository,
        _authRepository = authRepository {
-    init();
+    load = Command0(_load)..execute();
+    completeRegistration = Command0(_completeRegistration);
   }
+
+  final _logger = Logger();
+
+  late Command0 load;
+  late Command0 completeRegistration;
 
   final UserRepository _userRepository;
   final AuthRepository _authRepository;
+
+  CollectionCenter? _collectionCenter;
+  CollectionCenter? get collectionCenter => _collectionCenter;
 
   // Store days open
   Set<int> daysOpen = {};
@@ -40,52 +43,14 @@ class UploadFilesViewModel extends ChangeNotifier {
   final step2FormKey = GlobalKey<FormState>();
   final step3FormKey = GlobalKey<FormState>();
 
-  bool validateStep1() {
-    _logger.w(genScheduleMap());
-
-
-    if(selectedWasteIds.isEmpty) {
-      timeErrorMsj = 'Debe haber al menos un tipo de desecho aceptado';
-      notifyListeners();
-      return false;
-    }
-
-    if (daysOpen.isEmpty) {
-      timeErrorMsj = 'Debe haber al menos un día de operación';
-      notifyListeners();
-      return false;
-    }
-
-
-    // Iterate open days and check all all filled
-    for (int i = 0; i < daysOpen.length; i++) {
-      if (weekSchedules[daysOpen.elementAt(i)].isUncomplete()) {
-        timeErrorMsj = 'Todos los horarios deben ser llenados';
-        notifyListeners();
-        return false;
-      }
-    }
-    timeErrorMsj = null;
-    return step1FormKey.currentState?.validate() ?? false;
-  }
-
-  bool validateStep2() => step2FormKey.currentState?.validate() ?? false;
-
-  bool validateStep3() {
-    // Manual check for files
-    return pathIdRep != null &&
-        pathProofAddress != null &&
-        pathTaxCertificate != null;
-  }
-
   TaxpayerType _currentType = TaxpayerType.moral;
   TaxpayerType get currentType => _currentType;
 
-  void setTaxpayerType(TaxpayerType? value) {
-    if (value == null) return;
-    _currentType = value;
-    notifyListeners();
-  }
+  String _uploadMessage = "Iniciando registro...";
+  String get uploadMessage => _uploadMessage;
+
+  bool _isProcessing = false;
+  bool get isProcessing => _isProcessing;
 
   // Company data
   final companyNameController = TextEditingController(
@@ -109,13 +74,98 @@ class UploadFilesViewModel extends ChangeNotifier {
   final bankController = TextEditingController(text: "bankController");
   final clabeController = TextEditingController(text: "012180015488584106");
 
+  Future<Result> _load() async {
+    // Fetch collectionCenter
+    final collectionCenterResult = await _userRepository.getCollectionCenter(
+      forceRefresh: true,
+    );
+    switch (collectionCenterResult) {
+      case Ok<CollectionCenter>():
+        _collectionCenter = collectionCenterResult.value;
+
+      case Error<CollectionCenter>():
+        _logger.e(
+          'Error fetching initial collectionCenter ${collectionCenterResult.error}',
+        );
+        return Result.error(collectionCenterResult.error);
+    }
+
+    //------------------------CHECKBOX OF WASTE TYPES---------------
+    allWasteTypes = await _userRepository.fetchAllWasteTypes();
+
+    // Si ya tienen datos, no cargamos de nuevo
+    if (_privacyMd != null && _termsMd != null) {
+      _isLoading = false;
+      notifyListeners();
+      return Result.ok(null);
+    }
+
+    try {
+      // Cargamos ambos en paralelo
+      final results = await Future.wait([
+        rootBundle.loadString('assets/privacy_policy.md'),
+        rootBundle.loadString('assets/terms_and_conditions.md'),
+      ]);
+
+      _privacyMd = results[0];
+      _termsMd = results[1];
+    } catch (e) {
+      debugPrint("Error cargando MD: $e");
+    }
+    _isLoading = false;
+    notifyListeners();
+    return Result.ok(null);
+  }
+
+  bool validateStep1() {
+    _logger.w(genScheduleMap());
+
+    if (selectedWasteIds.isEmpty) {
+      timeErrorMsj = 'Debe haber al menos un tipo de desecho aceptado';
+      notifyListeners();
+      return false;
+    }
+
+    if (daysOpen.isEmpty) {
+      timeErrorMsj = 'Debe haber al menos un día de operación';
+      notifyListeners();
+      return false;
+    }
+
+    // Iterate open days and check all all filled
+    for (int i = 0; i < daysOpen.length; i++) {
+      if (weekSchedules[daysOpen.elementAt(i)].isUncomplete()) {
+        timeErrorMsj = 'Todos los horarios deben ser llenados';
+        notifyListeners();
+        return false;
+      }
+    }
+    timeErrorMsj = null;
+    return step1FormKey.currentState?.validate() ?? false;
+  }
+
+  bool validateStep2() => step2FormKey.currentState?.validate() ?? false;
+
+  bool validateStep3() {
+    // Manual check for files
+    return collectionCenter!.pathIdRep != null &&
+        collectionCenter!.pathProofAddress != null &&
+        collectionCenter!.pathTaxCertificate != null;
+  }
+
+  void setTaxpayerType(TaxpayerType? value) {
+    if (value == null) return;
+    _currentType = value;
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     companyNameController.dispose();
     commercialNameController.dispose();
     curpController.dispose();
     addressController.dispose();
-    postCodeController.dispose(); 
+    postCodeController.dispose();
     billingEmailController.dispose();
     rfcController.dispose();
     taxRegimeController.dispose();
@@ -124,14 +174,6 @@ class UploadFilesViewModel extends ChangeNotifier {
     super.dispose();
   }
 
-  // Docs upload data
-  String? pathIdRep;
-  String? pathProofAddress;
-  String? pathTaxCertificate;
-
-  final _logger = Logger();
-  late CollectionCenter _collectionCenter = CollectionCenter();
-
   String timeOfDaytoString(TimeOfDay value) {
     return '${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}';
   }
@@ -139,25 +181,25 @@ class UploadFilesViewModel extends ChangeNotifier {
   void updatePath(String field, dynamic value) {
     switch (field) {
       case 'pathIdRep':
-        pathIdRep = value;
+        _collectionCenter = _collectionCenter!.copyWith(pathIdRep: value);
         break;
       case 'pathProofAddress':
-        pathProofAddress = value;
+        _collectionCenter = _collectionCenter!.copyWith(
+          pathProofAddress: value,
+        );
         break;
       case 'pathTaxCertificate':
-        pathTaxCertificate = value;
+        _collectionCenter = _collectionCenter!.copyWith(
+          pathTaxCertificate: value,
+        );
         break;
     }
     notifyListeners();
   }
 
   void syncAllToModel() {
-    _collectionCenter = CollectionCenter(
-      id: '',
-      email: '',
-      phoneNumber: '',
-      password: '',
-      surnames: '',
+    _collectionCenter = _collectionCenter!.copyWith(
+      // Now that have uploated files, status is pending
       validationStatus: ValidationStatus.pending,
 
       companyName: companyNameController.text,
@@ -166,83 +208,86 @@ class UploadFilesViewModel extends ChangeNotifier {
       rfc: rfcController.text,
       taxRegime: taxRegimeController.text,
       taxpayerType: currentType.label,
-      scheduleMap: genScheduleMap(),
+      schedule: genScheduleMap(),
       postCode: postCodeController.text,
       clabe: clabeController.text,
       billingEmail: billingEmailController.text,
       bank: bankController.text,
       address: addressController.text,
-      pathIdRep: pathIdRep,
-      pathProofAddress: pathProofAddress,
-      pathTaxCertificate: pathTaxCertificate,
+      // Already in model:
+      // pathIdRep: pathIdRep,
+      // pathProofAddress: pathProofAddress,
+      // pathTaxCertificate: pathTaxCertificate,
     );
   }
-
-  String _uploadMessage = "Iniciando registro...";
-  String get uploadMessage => _uploadMessage;
-
-  bool _isProcessing = false;
-  bool get isProcessing => _isProcessing;
 
   void _updateProgress(String message) {
     _uploadMessage = message;
     notifyListeners();
   }
 
-  Future<void> completeRegistration() async {
-    final String userId = _authRepository.userId!;
-    _isProcessing = true;
+  Future<Result> _completeRegistration() async {
+    try {
+      final String userId = _authRepository.userId;
+      _isProcessing = true;
 
-    _updateProgress("Sincronizando datos...");
+      _updateProgress("Sincronizando datos...");
 
-    // Update model
-    syncAllToModel();
+      // Update model
+      syncAllToModel();
 
-    // Upload files
+      // Upload ID
+      _updateProgress("Subiendo: Identificación del Representante...");
+      await uploadDocument(userId, _collectionCenter!.pathIdRep, 'pathIdRep');
 
-    // Upload ID
-    _updateProgress("Subiendo: Identificación del Representante...");
-    await uploadDocument(userId, _collectionCenter.pathIdRep, 'pathIdRep');
+      // Upload Proof Address
+      _updateProgress("Subiendo: Comprobante de Domicilio...");
+      await uploadDocument(
+        userId,
+        _collectionCenter!.pathProofAddress,
+        'pathProofAddress',
+      );
+      // Upload Tax Certificate
+      _updateProgress("Subiendo: Constancia de Situación Fiscal...");
+      await uploadDocument(
+        userId,
+        _collectionCenter!.pathTaxCertificate,
+        'pathTaxCertificate',
+      );
+      _updateProgress("Subiendo tipos de materiales");
+      await _userRepository.saveCenterCapabilities(
+        centerId: _authRepository.userId,
+        selectedWasteIds: selectedWasteIds,
+      );
 
-    // Upload Proof Address
-    _updateProgress("Subiendo: Comprobante de Domicilio...");
-    await uploadDocument(
-      userId,
-      _collectionCenter.pathProofAddress,
-      'pathProofAddress',
-    );
-    // Upload Tax Certificate
-    _updateProgress("Subiendo: Constancia de Situación Fiscal...");
-    await uploadDocument(
-      userId,
-      _collectionCenter.pathTaxCertificate,
-      'pathTaxCertificate',
-    );
+      // Database sync
+      _updateProgress("Finalizando: Información del Centro de Acopio...");
 
-    _updateProgress("Subiendo tipos de materiales");
-    await _userRepository.saveCenterCapabilities(centerId: _authRepository.userId!, selectedWasteIds: selectedWasteIds);
+      // Upload all data to Database
+      final result = await _userRepository.uploadUserData(
+        'collection_centers',
+        _authRepository.userId,
+        _collectionCenter!,
+      );
+      switch (result) {
+        case Ok():
+          _updateProgress('Todo listo!');
+          _logger.d(_collectionCenter!.toJson());
+          _isProcessing = false;
+          return Result.ok(null);
 
-    // Database sync
-    _updateProgress("Finalizando: Información del Centro de Acopio...");
-
-    // Upload all data to Database
-    final result = await _userRepository.uploadUserData(
-      'collection_centers',
-      _authRepository.userId!,
-      _collectionCenter.toJson(),
-    );
-    switch (result) {
-      case Ok():
-        _updateProgress('Todo listo!');
-        _logger.d(_collectionCenter.toJson());
-        await _userRepository.getValidationStatus(userId, forceRefresh: true);
-        _isProcessing = false;
-        break;
-      case Error():
-        _updateProgress("Error al subir los datos. Reintenta.");
-        _isProcessing = false;
-        _logger.e(_collectionCenter.toJson());
-        break;
+        case Error():
+          _updateProgress("Error al subir los datos. Reintenta.");
+          await Future.delayed(Duration(seconds: 5));
+          _isProcessing = false;
+          _logger.e('${_collectionCenter!.toJson()}\n ${result.error}');
+          return Result.error(Exception());
+      }
+    } on Exception catch (error) {
+      _logger.e('Error UPLAODING STORE $error');
+      return Result.error(error);
+    } finally {
+      notifyListeners();
     }
   }
 
@@ -272,15 +317,15 @@ class UploadFilesViewModel extends ChangeNotifier {
       // Update the model with the STORAGE path, not the local path
       switch (docType) {
         case 'pathIdRep':
-          _collectionCenter = _collectionCenter.copyWith(pathIdRep: result);
+          _collectionCenter = _collectionCenter!.copyWith(pathIdRep: result);
           break;
         case 'pathProofAddress':
-          _collectionCenter = _collectionCenter.copyWith(
+          _collectionCenter = _collectionCenter!.copyWith(
             pathProofAddress: result,
           );
           break;
         case 'pathTaxCertificate':
-          _collectionCenter = _collectionCenter.copyWith(
+          _collectionCenter = _collectionCenter!.copyWith(
             pathTaxCertificate: result,
           );
           break;
@@ -375,39 +420,6 @@ class UploadFilesViewModel extends ChangeNotifier {
   String get termsData => _termsMd ?? "";
   bool get isLoading => _isLoading;
 
-  Future<void> init() async {
-
-
-    //------------------------CHARGE TERMSN AND CONDITIONS---------------
-
-    // Si ya tienen datos, no cargamos de nuevo
-    if (_privacyMd != null && _termsMd != null) {
-      _isLoading = false;
-      notifyListeners();
-      return;
-    }
-
-    try {
-      // Cargamos ambos en paralelo
-      final results = await Future.wait([
-        rootBundle.loadString('assets/privacy_policy.md'),
-        rootBundle.loadString('assets/terms_and_conditions.md'),
-      ]);
-
-      _privacyMd = results[0];
-      _termsMd = results[1];
-    } catch (e) {
-      debugPrint("Error cargando MD: $e");
-    }
-    _isLoading = false;
-
-
-    //------------------------CHECKBOX OF WASTE TYPES---------------
-    allWasteTypes = await _userRepository.fetchAllWasteTypes();
-
-    notifyListeners();
-  }
-
   void setAccepted(bool value) {
     _isAccepted = value;
     notifyListeners();
@@ -430,76 +442,6 @@ class UploadFilesViewModel extends ChangeNotifier {
     }
     notifyListeners();
     _logger.w(selectedWasteIds);
-  }
-}
-
-class Validators {
-  // Empty Check
-  static String? required(String? value) =>
-      (value == null || value.isEmpty) ? 'Este campo es obligatorio' : null;
-
-  // Email (Billing)
-  static String? email(String? value) {
-    final emptyField = required(value);
-    if (emptyField != null) {
-      return emptyField;
-    }
-    final bool emailValid = RegExp(
-      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-    ).hasMatch(value ?? '');
-    return emailValid ? null : 'Correo electrónico no válido';
-  }
-
-  // CURP (Mexico - 18 chars)
-  static String? curp(String? value) {
-    final emptyField = required(value);
-    if (emptyField != null) {
-      return emptyField;
-    }
-    final bool curpValid = RegExp(
-      r'^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z\d]\d$',
-    ).hasMatch(value ?? '');
-    return curpValid ? null : 'CURP no válido (revisa 18 caracteres y formato)';
-  }
-
-  // RFC (Mexico - 12 or 13 chars)
-  static String? rfc(String? value) {
-    /*
-    Regex retrieved and fixed from
-    https://wwwmat.sat.gob.mx/cs/Satellite?blobcol=urldata&blobkey=id&blobtable=MungoBlobs&blobwhere=1461175750735&ssbinary=true
-    
-    Rfc contribuyente (original):
-    ˆ([A-ZÑ]|\&){3,4}[0-9]{2}(0[1-9]|1[0-2])([12][0-9]|0[1-9]|3[01])[A-Z0-9]{3}$
-      */
-
-    final emptyField = required(value);
-    if (emptyField != null) {
-      return emptyField;
-    }
-
-    final bool rfcValid = RegExp(
-      r'^([A-ZÑ&]{3,4})([0-9]{2})(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])[A-Z\d]{3}$',
-    ).hasMatch(value ?? '');
-    return rfcValid ? null : 'RFC no válido';
-  }
-
-  // CLABE (18 digits)
-  static String? clabe(String? value) {
-    final emptyField = required(value);
-    if (emptyField != null) {
-      return emptyField;
-    }
-    final bool clabeValid = RegExp(r'^\d{18}$').hasMatch(value ?? '');
-    return clabeValid ? null : 'CLABE debe tener 18 dígitos';
-  }
-
-  static String? postCode(String? value) {
-    final emptyField = required(value);
-    if (emptyField != null) {
-      return emptyField;
-    }
-    final bool postCodeValid = RegExp(r'^\d{5}$').hasMatch(value ?? '');
-    return postCodeValid ? null : 'Código postal debe tener 5 dígitos';
   }
 }
 
