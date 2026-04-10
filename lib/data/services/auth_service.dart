@@ -23,6 +23,21 @@ class AuthService {
         email: email,
         password: password,
       );
+
+      // Check user role is participant, maybeSingle() to prevent Postgrest exceptions if row is missing
+      final data = await _supabase
+          .from('users')
+          .select('user_type')
+          .eq('id', currentUserId!)
+          .maybeSingle();
+
+      // Check the data
+      bool isCCenter = data != null && data['user_type'] == 'collection_center';
+
+      if (!isCCenter) {
+        await _supabase.auth.signOut(); // Ensure explicit sign-out
+        return Result.error(Exception('Not center credentials'));
+      }
       return Result.ok(result);
     } on AuthException catch (error) {
       // Supabase error

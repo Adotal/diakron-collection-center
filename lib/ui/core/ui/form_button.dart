@@ -18,7 +18,12 @@ class FormButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: onPressed,
+      onPressed: () {
+        // Close keyboard and exec onpressed
+
+        FocusManager.instance.primaryFocus?.unfocus();
+        onPressed();
+      },
       style: ElevatedButton.styleFrom(
         minimumSize: const Size(150, 60),
         backgroundColor: AppColors.greenDiakron1,

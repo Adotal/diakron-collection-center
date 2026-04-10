@@ -20,8 +20,7 @@ class ResetPasswordScreen extends StatefulWidget {
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final TextEditingController _password = TextEditingController();
   final TextEditingController _confirmPassword = TextEditingController();
-  
-  bool _isPasswordObscured = true;
+
 
   @override
   void initState() {
@@ -56,39 +55,17 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               style: TextStyle(fontSize: Dimens.fontBig),
             ),
             const SizedBox(height: Dimens.paddingVertical),
-           InputText(
-            controller: _password,
-            hintText: AppLocalizations.of(context)!.password,
-            obscureText: _isPasswordObscured,
-            suffixIcon: IconButton(
-              icon: Icon(
-                _isPasswordObscured ? Icons.visibility_off : Icons.visibility,
-                color: Colors.grey,
-              ),
-              onPressed: () {
-                setState(() {
-                  _isPasswordObscured = !_isPasswordObscured;
-                });
-              },
+            InputText(
+              controller: _password,
+              hintText: AppLocalizations.of(context)!.password,
+              isPassword: true,
             ),
-          ),
             const SizedBox(height: Dimens.paddingVertical),
             InputText(
-            controller: _confirmPassword,
-            hintText: AppLocalizations.of(context)!.confirmPassword,
-            obscureText: _isPasswordObscured,
-            suffixIcon: IconButton(
-              icon: Icon(
-                _isPasswordObscured ? Icons.visibility_off : Icons.visibility,
-                color: Colors.grey,
-              ),
-              onPressed: () {
-                setState(() {
-                  _isPasswordObscured = !_isPasswordObscured;
-                });
-              },
+              controller: _confirmPassword,
+              hintText: AppLocalizations.of(context)!.confirmPassword,
+              isPassword: true,
             ),
-          ),
             const SizedBox(height: Dimens.paddingVertical),
             FormButton(
               text: "Reestablecer",

@@ -21,13 +21,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-GoRouter router(AuthRepository authRepository, UserRepository userRepository) => GoRouter(
+GoRouter router(
+  AuthRepository authRepository,
+  UserRepository userRepository,
+) => GoRouter(
   initialLocation: Routes.login,
   debugLogDiagnostics: true, // TESTING
-  refreshListenable: Listenable.merge([
-   authRepository,
-   userRepository,
-  ]),
+  refreshListenable: Listenable.merge([authRepository, userRepository]),
   redirect: _redirect,
 
   routes: [
@@ -40,16 +40,23 @@ GoRouter router(AuthRepository authRepository, UserRepository userRepository) =>
         return LoginScreen(viewModel: viewModel);
       },
     ),
+
     GoRoute(
       path: Routes.home,
-      builder: (context, state) {
-        return HomeScreen(
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: HomeScreen(
           viewModel: HomeViewModel(
             authRepository: context.read<AuthRepository>(),
           ),
-        );
-      },
+        ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          // Use a simple fade so the pre-charged home page appears smoothly
+          return FadeTransition(opacity: animation, child: child);
+        },
+      ),
     ),
+
     GoRoute(
       path: Routes.forgotpassword,
       builder: (context, state) {
@@ -137,6 +144,10 @@ Future<String?> _redirect(BuildContext context, GoRouterState state) async {
       return null;
     }
     return Routes.login;
+  }
+
+  if (authRepo.isVerifyingAuth) {
+    return null;
   }
 
   //final ValidationStatus validationStatus = userRepo.validationStatus!;

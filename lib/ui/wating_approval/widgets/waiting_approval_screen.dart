@@ -13,8 +13,12 @@ class WaitingApprovalPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         actions: [
-          LogoutButton(viewModel: LogoutViewModel(authRepository: context.read(),
-                      userRepository: context.read<UserRepository>() ))
+          LogoutButton(
+            viewModel: LogoutViewModel(
+              authRepository: context.read(),
+              userRepository: context.read<UserRepository>(),
+            ),
+          ),
         ],
       ),
       body: Center(
@@ -42,7 +46,10 @@ class WaitingApprovalPage extends StatelessWidget {
                   final auth = context.read<AuthRepository>();
                   final userRepo = context.read<UserRepository>();
                   // Force a check to see if status changed to 'approved'
-                  await userRepo.getValidationStatus(auth.userId!, forceRefresh: true);
+                  await userRepo.getValidationStatus(
+                    auth.userId!,
+                    forceRefresh: true,
+                  );
                 },
               ),
             ],

@@ -1,3 +1,4 @@
+import 'package:diakron_collection_center/data/repositories/auth/auth_repository.dart';
 import 'package:diakron_collection_center/l10n/app_localizations.dart';
 import 'package:diakron_collection_center/routing/routes.dart';
 import 'package:diakron_collection_center/ui/auth/login/view_models/login_viewmodel.dart';
@@ -8,6 +9,7 @@ import 'package:diakron_collection_center/ui/core/ui/form_button.dart';
 import 'package:diakron_collection_center/ui/core/ui/input_text.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.viewModel});
@@ -32,7 +34,6 @@ class _LoginScreenState extends State<LoginScreen>
   late Animation<double> _borderRadiusAnimation;
   bool _isAnimating = false;
   bool _showForm = true;
-  bool _isPasswordObscured = true;
 
   @override
   void initState() {
@@ -126,18 +127,7 @@ class _LoginScreenState extends State<LoginScreen>
           InputText(
             controller: _password,
             hintText: AppLocalizations.of(context)!.password,
-            obscureText: _isPasswordObscured,
-            suffixIcon: IconButton(
-              icon: Icon(
-                _isPasswordObscured ? Icons.visibility_off : Icons.visibility,
-                color: Colors.grey,
-              ),
-              onPressed: () {
-                setState(() {
-                  _isPasswordObscured = !_isPasswordObscured;
-                });
-              },
-            ),
+            isPassword: true,
           ),
 
           const SizedBox(height: 10),
@@ -321,8 +311,11 @@ class _LoginScreenState extends State<LoginScreen>
         curve: Curves.easeInOutQuart,
       );
 
-      // Ve a home      
-      if (mounted) context.go(Routes.home);
+      // Ve a home
+      // UNLOCK ROUTER
+      if (mounted) {
+        context.read<AuthRepository>().unlockRouter();
+      }
     }
 
     if (widget.viewModel.login.error) {
