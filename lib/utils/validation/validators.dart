@@ -9,8 +9,8 @@ class Validators {
     if (emptyField != null) {
       return emptyField;
     }
-    final bool emailValid = RegExp(
-      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+    final bool emailValid = RegExp(      
+      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,}$',
     ).hasMatch(value ?? '');
     return emailValid ? null : 'Correo electrónico no válido';
   }

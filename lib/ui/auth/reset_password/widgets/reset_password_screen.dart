@@ -44,6 +44,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return CustomScreen(
+      title: 'Diakron',
       child: Center(
         child: ListView(
           shrinkWrap: true,
